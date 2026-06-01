@@ -1,0 +1,62 @@
+name: Feature Request
+description: New feature or improvement
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      options:
+        - module:core-engine
+        - module:grid-ui
+        - module:progression
+        - module:monetization
+        - module:daily-puzzle
+        - module:ui-screens
+        - module:tutorial
+        - module:audio
+        - module:content
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0-critical
+        - P1-high
+        - P2-medium
+        - P3-low
+    validations:
+      required: true
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      placeholder: "As a [user], I want to [action] so that [benefit]"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+  - type: textarea
+    id: design-refs
+    attributes:
+      label: Design References
+      placeholder: "Link to mockup screen or describe the UI"
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort Estimate
+      options:
+        - XS (< 2 hours)
+        - S (2-4 hours)
+        - M (1-2 days)
+        - L (3-5 days)
+        - XL (1+ week)

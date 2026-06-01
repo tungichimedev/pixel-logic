@@ -1,0 +1,34 @@
+name: Task
+description: Development or operational task
+labels: ["task", "needs-triage"]
+body:
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      options:
+        - module:core-engine
+        - module:grid-ui
+        - module:progression
+        - module:monetization
+        - module:daily-puzzle
+        - module:ui-screens
+        - module:tutorial
+        - module:audio
+        - module:content
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: "What needs to be done and why"
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist
+      placeholder: |
+        - [ ] Step 1
+        - [ ] Step 2

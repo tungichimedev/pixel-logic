@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        run: flutter test --coverage
+
+      - name: Check coverage threshold
+        run: |
+          if [ -f coverage/lcov.info ]; then
+            COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep "lines" | grep -oP '[\d.]+(?=%)')
+            echo "Coverage: $COVERAGE%"
+            if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+              echo "Coverage below 70% threshold"
+              exit 1
+            fi
+          fi
+
+  build-ios:
+    runs-on: macos-latest
+    needs: analyze-and-test
+    if: github.base_ref == 'main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --debug --no-codesign
