@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_theme.dart';
 import 'home_screen.dart';
 import 'gallery_screen.dart';
 import 'settings_screen.dart';
+import 'tutorial_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -13,6 +15,25 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+  bool _showTutorial = false;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkTutorial();
+  }
+
+  Future<void> _checkTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final done = prefs.getBool('tutorial_complete') ?? false;
+    if (mounted) {
+      setState(() {
+        _showTutorial = !done;
+        _loaded = true;
+      });
+    }
+  }
 
   final _screens = const [
     HomeScreen(),
@@ -22,6 +43,19 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_loaded) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
+
+    if (_showTutorial) {
+      return TutorialScreen(
+        onComplete: () => setState(() => _showTutorial = false),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: IndexedStack(index: _currentIndex, children: _screens),

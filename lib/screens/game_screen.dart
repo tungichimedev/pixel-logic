@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../controllers/daily_controller.dart';
 import '../controllers/game_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../models/nonogram_state.dart';
@@ -24,6 +25,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   int _elapsedSeconds = 0;
   Timer? _timer;
   bool _showComplete = false;
+  bool _showZeroLives = false;
 
   @override
   void initState() {
@@ -34,6 +36,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       final puzzle = PuzzleRegistry.findById(widget.puzzleId);
       if (puzzle != null) {
         ref.read(gameControllerProvider.notifier).loadPuzzle(puzzle);
+      } else if (widget.puzzleId.startsWith('daily_')) {
+        // Daily puzzle
+        final daily = ref.read(dailyProvider);
+        ref.read(gameControllerProvider.notifier).loadPuzzle(daily.puzzle);
       }
     });
   }
@@ -73,6 +79,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final state = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
 
+    // Detect zero lives
+    ref.listen(gameControllerProvider, (prev, next) {
+      if (next.livesRemaining <= 0 && (prev?.livesRemaining ?? 3) > 0) {
+        HapticFeedback.heavyImpact();
+        _timer?.cancel();
+        setState(() => _showZeroLives = true);
+      }
+    });
+
     // Detect completion
     ref.listen(gameControllerProvider, (prev, next) {
       if (next.isComplete && !(prev?.isComplete ?? false)) {
@@ -90,6 +105,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           result,
           gridSize: next.puzzle.gridSize,
         );
+        // Handle daily puzzle completion
+        if (next.puzzle.id.startsWith('daily_')) {
+          ref.read(dailyProvider.notifier).completeDaily(_elapsedSeconds);
+        }
         setState(() => _showComplete = true);
       }
     });
@@ -125,6 +144,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 const SizedBox(height: 16),
               ],
             ),
+            // Zero lives overlay
+            if (_showZeroLives) _buildZeroLivesOverlay(controller),
             // Completion overlay
             if (_showComplete) _buildCompletionOverlay(state, controller),
           ],
@@ -306,6 +327,125 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               color: active ? const Color(0xFF1a0a00) : const Color(0xFF9999CC),
               letterSpacing: 1,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildZeroLivesOverlay(GameController controller) {
+    return Container(
+      color: const Color(0xFF0F0C29).withValues(alpha: 0.85),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 40),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1a1464), Color(0xFF12103a)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.hearts.withValues(alpha: 0.1),
+                blurRadius: 30,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Title
+              ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: AppColors.primaryGradient,
+                ).createShader(bounds),
+                child: const Text(
+                  'Need More Lives?',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Depleted hearts
+              const Text(
+                '\u2661 \u2661 \u2661',
+                style: TextStyle(fontSize: 24, color: Color(0xFF661111)),
+              ),
+              const SizedBox(height: 16),
+              // Watch ad button (placeholder)
+              GestureDetector(
+                onTap: () {
+                  // Restore lives (simulate ad watched)
+                  controller.restoreLives();
+                  _startTimer();
+                  setState(() => _showZeroLives = false);
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryDark.withValues(alpha: 0.4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'RESTORE 3 \u2764',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1a0a00),
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Quit button
+              GestureDetector(
+                onTap: () => context.pop(),
+                child: Container(
+                  width: double.infinity,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Save & Exit',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Your progress is safe',
+                style: TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ),
       ),

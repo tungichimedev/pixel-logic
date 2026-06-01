@@ -62,6 +62,10 @@ class GameController extends Notifier<NonogramState> {
     );
   }
 
+  void restoreLives() {
+    state = state.copyWith(livesRemaining: 3);
+  }
+
   void resetPuzzle() {
     state = NonogramState.initial(state.puzzle);
   }

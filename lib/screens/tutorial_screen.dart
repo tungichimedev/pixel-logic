@@ -1,0 +1,324 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/app_theme.dart';
+
+class TutorialScreen extends StatefulWidget {
+  final VoidCallback onComplete;
+
+  const TutorialScreen({super.key, required this.onComplete});
+
+  @override
+  State<TutorialScreen> createState() => _TutorialScreenState();
+}
+
+class _TutorialScreenState extends State<TutorialScreen> {
+  int _step = 0;
+
+  // Tutorial 3x3 grid state
+  final _cells = List.generate(3, (_) => List.filled(3, false));
+
+  // Target pattern (simple L shape)
+  final _solution = [
+    [true, false, false],
+    [true, false, false],
+    [true, true, true],
+  ];
+
+  final _steps = [
+    (
+      title: 'Read the Clues',
+      desc: 'Numbers on the left and top tell you how many cells to fill in each row and column.',
+      highlight: 'clues',
+    ),
+    (
+      title: 'Fill Cells',
+      desc: 'Tap a cell to fill it. The clue "3" means fill 3 cells in a row.',
+      highlight: 'row3',
+    ),
+    (
+      title: 'Check Satisfaction',
+      desc: 'When a row or column is correctly filled, the clue turns green!',
+      highlight: 'satisfied',
+    ),
+    (
+      title: 'Solve the Puzzle!',
+      desc: 'Fill all the correct cells to reveal the hidden picture. Try completing this one!',
+      highlight: 'solve',
+    ),
+  ];
+
+  bool get _isSolved {
+    for (int r = 0; r < 3; r++) {
+      for (int c = 0; c < 3; c++) {
+        if (_cells[r][c] != _solution[r][c]) return false;
+      }
+    }
+    return true;
+  }
+
+  void _tapCell(int row, int col) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _cells[row][col] = !_cells[row][col];
+      if (_isSolved && _step == 3) {
+        HapticFeedback.heavyImpact();
+        _completeTutorial();
+      }
+    });
+  }
+
+  Future<void> _completeTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tutorial_complete', true);
+    if (mounted) widget.onComplete();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentStep = _steps[_step];
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 32),
+              // Title
+              const Text(
+                'HOW TO PLAY',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Step title
+              Text(
+                currentStep.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                currentStep.desc,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Tutorial grid
+              _buildTutorialGrid(),
+              const Spacer(),
+              // Progress dots
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(4, (i) {
+                  return Container(
+                    width: i == _step ? 24 : 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      color: i == _step
+                          ? AppColors.primary
+                          : AppColors.textMuted.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 16),
+              // Buttons
+              Row(
+                children: [
+                  // Skip
+                  GestureDetector(
+                    onTap: _completeTutorial,
+                    child: const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text(
+                        'Skip',
+                        style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Next
+                  if (_step < 3)
+                    GestureDetector(
+                      onTap: () => setState(() => _step++),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryDark.withValues(alpha: 0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'NEXT',
+                              style: TextStyle(
+                                color: Color(0xFF1a0a00),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(Icons.arrow_forward_rounded, size: 16, color: Color(0xFF1a0a00)),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTutorialGrid() {
+    // Row clues for L-shape: [1], [1], [3]
+    // Col clues: [3], [1], [1]
+    final rowClues = ['1', '1', '3'];
+    final colClues = ['3', '1', '1'];
+    const cellSize = 56.0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Column clues
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 40),
+            ...List.generate(3, (col) {
+              final satisfied = _isColSatisfied(col);
+              return SizedBox(
+                width: cellSize + 2,
+                child: Text(
+                  colClues[col],
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: satisfied ? AppColors.satisfied : AppColors.textSecondary,
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+        const SizedBox(height: 4),
+        // Rows
+        ...List.generate(3, (row) {
+          final satisfied = _isRowSatisfied(row);
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 40,
+                child: Text(
+                  rowClues[row],
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: satisfied ? AppColors.satisfied : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              ...List.generate(3, (col) {
+                final filled = _cells[row][col];
+                final shouldPulse = _step == 1 && row == 2 && !_cells[row][col];
+                return GestureDetector(
+                  onTap: () => _tapCell(row, col),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: cellSize,
+                    height: cellSize,
+                    margin: const EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                      gradient: filled
+                          ? const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xFF5599FF), Color(0xFF4488FF)],
+                            )
+                          : null,
+                      color: filled ? null : AppColors.surface,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: shouldPulse
+                            ? AppColors.primary.withValues(alpha: 0.5)
+                            : filled
+                                ? Colors.transparent
+                                : AppColors.borderMedium,
+                        width: shouldPulse ? 2 : 1,
+                      ),
+                      boxShadow: filled
+                          ? [
+                              BoxShadow(
+                                color: AppColors.cellFilled.withValues(alpha: 0.4),
+                                blurRadius: 4,
+                              ),
+                            ]
+                          : null,
+                    ),
+                  ),
+                );
+              }),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  bool _isRowSatisfied(int row) {
+    final expected = _solution[row].where((c) => c).length;
+    final actual = _cells[row].where((c) => c).length;
+    // Check pattern matches
+    if (actual != expected) return false;
+    for (int c = 0; c < 3; c++) {
+      if (_cells[row][c] != _solution[row][c]) return false;
+    }
+    return true;
+  }
+
+  bool _isColSatisfied(int col) {
+    final expected = List.generate(3, (r) => _solution[r][col]).where((c) => c).length;
+    final actual = List.generate(3, (r) => _cells[r][col]).where((c) => c).length;
+    if (actual != expected) return false;
+    for (int r = 0; r < 3; r++) {
+      if (_cells[r][col] != _solution[r][col]) return false;
+    }
+    return true;
+  }
+}

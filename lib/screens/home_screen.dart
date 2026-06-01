@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../controllers/daily_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../utils/app_theme.dart';
 import '../utils/puzzle_registry.dart';
@@ -45,10 +46,13 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             // Mini heart decoration
             _buildMiniHeart(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            // Daily puzzle banner
+            _buildDailyBanner(context, ref),
+            const SizedBox(height: 12),
             // Player stats
             _buildPlayerStats(progress),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             // Pack list
             Expanded(
               child: ListView.builder(
@@ -80,6 +84,89 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildDailyBanner(BuildContext context, WidgetRef ref) {
+    final daily = ref.watch(dailyProvider);
+    return GestureDetector(
+      onTap: daily.completed
+          ? null
+          : () => context.push('/play/${daily.puzzle.id}'),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primary.withValues(alpha: 0.08),
+              AppColors.primaryDark.withValues(alpha: 0.03),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.05),
+              blurRadius: 12,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                gradient: daily.completed
+                    ? const LinearGradient(colors: [AppColors.satisfied, Color(0xFF00C853)])
+                    : const LinearGradient(colors: AppColors.primaryGradient),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                daily.completed ? Icons.check_rounded : Icons.bolt_rounded,
+                color: daily.completed ? Colors.white : const Color(0xFF1a0a00),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'DAILY CHALLENGE',
+                    style: TextStyle(
+                      color: daily.completed ? AppColors.satisfied : AppColors.primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  Text(
+                    daily.completed
+                        ? 'Completed! Best: ${_formatTime(daily.bestTimeSeconds ?? 0)}'
+                        : '${daily.puzzle.gridSize}x${daily.puzzle.gridSize} \u2022 +100 XP \u2022 +1 Hint',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (!daily.completed)
+              const Icon(Icons.chevron_right_rounded, color: AppColors.primary, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 
   int _completedInPreviousPack(ProgressState progress, int packIndex) {
