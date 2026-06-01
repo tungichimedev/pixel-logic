@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../controllers/achievements_controller.dart';
 import '../controllers/daily_controller.dart';
 import '../controllers/game_controller.dart';
 import '../controllers/progress_controller.dart';
@@ -109,7 +110,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         if (next.puzzle.id.startsWith('daily_')) {
           ref.read(dailyProvider.notifier).completeDaily(_elapsedSeconds);
         }
+        // Check achievements
+        final progressState = ref.read(progressProvider);
+        ref.read(achievementsProvider.notifier).checkAfterPuzzle(progressState, next.mistakes);
         setState(() => _showComplete = true);
+        // Show achievement popup after a delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (!mounted) return;
+          final unlocked = ref.read(achievementsProvider.notifier).consumeLastUnlocked();
+          if (unlocked != null) {
+            final achievement = AchievementsController.achievements.firstWhere((a) => a.id == unlocked);
+            _showAchievementPopup(achievement);
+          }
+        });
       }
     });
 
@@ -640,5 +653,67 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     if (noErrors && underPar) return 3;
     if (noErrors || underPar) return 2;
     return 1;
+  }
+
+  void _showAchievementPopup(Achievement achievement) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primary.withValues(alpha: 0.15),
+                AppColors.primaryDark.withValues(alpha: 0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                blurRadius: 20,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Text(achievement.icon, style: const TextStyle(fontSize: 24)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'ACHIEVEMENT UNLOCKED!',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    Text(
+                      achievement.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
