@@ -5,11 +5,13 @@ import '../models/nonogram_state.dart';
 class NonogramGridWidget extends StatefulWidget {
   final NonogramState state;
   final void Function(int row, int col) onCellTap;
+  final void Function(int row, int col)? onHintTap;
 
   const NonogramGridWidget({
     super.key,
     required this.state,
     required this.onCellTap,
+    this.onHintTap,
   });
 
   @override
@@ -112,19 +114,30 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
                     const SizedBox(width: 4),
                     // Cells
                     ...List.generate(gridSize, (col) {
+                      final isError = widget.state.errorCells.contains((row, col));
+                      final isHintTarget = widget.state.isHintMode &&
+                          widget.state.cells[row][col] != CellState.filled &&
+                          widget.state.cells[row][col] != CellState.revealed;
                       return GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
-                          widget.onCellTap(row, col);
+                          if (widget.state.isHintMode && widget.onHintTap != null) {
+                            widget.onHintTap!(row, col);
+                          } else {
+                            widget.onCellTap(row, col);
+                          }
                         },
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
                           width: _cellSize,
                           height: _cellSize,
                           margin: const EdgeInsets.all(0.5),
-                          decoration:
-                              _cellDecoration(widget.state.cells[row][col]),
-                          child: _cellChild(
-                              widget.state.cells[row][col], _cellSize),
+                          decoration: isError
+                              ? _errorDecoration()
+                              : _cellDecoration(widget.state.cells[row][col], isHintTarget: isHintTarget),
+                          child: isError
+                              ? _errorChild(_cellSize)
+                              : _cellChild(widget.state.cells[row][col], _cellSize),
                         ),
                       );
                     }),
@@ -214,7 +227,23 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
 
   // --- Cell visuals ---
 
-  BoxDecoration _cellDecoration(CellState cell) {
+  BoxDecoration _cellDecoration(CellState cell, {bool isHintTarget = false}) {
+    if (isHintTarget) {
+      return BoxDecoration(
+        color: const Color(0xFF1a1850),
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(
+          color: const Color(0xFFFFD84B).withValues(alpha: 0.5),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFFD84B).withValues(alpha: 0.15),
+            blurRadius: 6,
+          ),
+        ],
+      );
+    }
     switch (cell) {
       case CellState.empty:
         return BoxDecoration(
@@ -255,6 +284,36 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
               Border.all(color: const Color(0xFF00E676).withValues(alpha: 0.4)),
         );
     }
+  }
+
+  BoxDecoration _errorDecoration() {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFFFF4444), Color(0xFFFF3B30)],
+      ),
+      borderRadius: BorderRadius.circular(2),
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0xFFFF3B30).withValues(alpha: 0.5),
+          blurRadius: 6,
+        ),
+      ],
+    );
+  }
+
+  Widget? _errorChild(double size) {
+    return Center(
+      child: Text(
+        '\u2715',
+        style: TextStyle(
+          fontSize: size * 0.45,
+          fontWeight: FontWeight.w900,
+          color: Colors.white.withValues(alpha: 0.9),
+        ),
+      ),
+    );
   }
 
   Widget? _cellChild(CellState cell, double size) {

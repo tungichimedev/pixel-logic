@@ -13,32 +13,37 @@ class GameController extends Notifier<NonogramState> {
   }
 
   void tapCell(int row, int col) {
-    if (state.isComplete) return;
+    if (state.isComplete || state.livesRemaining <= 0) return;
     if (row < 0 || row >= state.puzzle.gridSize) return;
     if (col < 0 || col >= state.puzzle.gridSize) return;
+    if (state.isHintMode) return; // Don't allow normal taps in hint mode
 
     final currentCell = state.cells[row][col];
     if (currentCell == CellState.revealed) return;
 
-    final newCells = state.cells.map((r) => List<CellState>.from(r)).toList();
+    final newCells = _copyCells();
 
     if (state.inputMode == InputMode.fill) {
       if (currentCell == CellState.filled) {
         newCells[row][col] = CellState.empty;
+      } else if (currentCell == CellState.marked) {
+        // Can't fill a marked cell — unfill the mark first
+        return;
       } else {
-        // Check if correct (error checking)
         if (!state.puristMode && !state.isCellCorrect(row, col)) {
-          // Wrong cell — lose a life
+          // Wrong cell — add to error set, lose a life
+          final newErrors = Set<(int, int)>.from(state.errorCells)..add((row, col));
           state = state.copyWith(
             livesRemaining: state.livesRemaining - 1,
             mistakes: state.mistakes + 1,
+            errorCells: newErrors,
           );
+          // Error cells auto-clear after delay (handled in UI)
           return;
         }
         newCells[row][col] = CellState.filled;
       }
     } else {
-      // Mark mode
       if (currentCell == CellState.marked) {
         newCells[row][col] = CellState.empty;
       } else if (currentCell == CellState.empty) {
@@ -53,6 +58,56 @@ class GameController extends Notifier<NonogramState> {
       state = newState;
     }
   }
+
+  // --- Hint System ---
+
+  void enterHintMode() {
+    if (state.isComplete) return;
+    state = state.copyWith(isHintMode: true);
+  }
+
+  void exitHintMode() {
+    state = state.copyWith(isHintMode: false);
+  }
+
+  /// Reveal a single cell. Returns true if hint was applied.
+  bool useHintOnCell(int row, int col) {
+    if (!state.isHintMode) return false;
+    if (state.cells[row][col] == CellState.filled ||
+        state.cells[row][col] == CellState.revealed) {
+      return false;
+    }
+
+    final newCells = _copyCells();
+    if (state.isCellCorrect(row, col)) {
+      newCells[row][col] = CellState.revealed;
+    } else {
+      // Cell should be empty — mark it
+      newCells[row][col] = CellState.marked;
+    }
+
+    final newState = state.copyWith(
+      cells: newCells,
+      hintsUsed: state.hintsUsed + 1,
+      isHintMode: false,
+    );
+
+    if (newState.checkComplete) {
+      state = newState.copyWith(isComplete: true);
+    } else {
+      state = newState;
+    }
+    return true;
+  }
+
+  // --- Error clearing ---
+
+  void clearErrors() {
+    if (state.errorCells.isEmpty) return;
+    state = state.copyWith(errorCells: {});
+  }
+
+  // --- Utilities ---
 
   void toggleMode() {
     state = state.copyWith(
@@ -70,8 +125,10 @@ class GameController extends Notifier<NonogramState> {
     state = NonogramState.initial(state.puzzle);
   }
 
+  List<List<CellState>> _copyCells() =>
+      state.cells.map((r) => List<CellState>.from(r)).toList();
+
   static NonogramPuzzle _samplePuzzle() {
-    // 5x5 Heart
     return NonogramPuzzle.fromPixelGrid(
       id: 'sample_heart',
       title: 'Heart',

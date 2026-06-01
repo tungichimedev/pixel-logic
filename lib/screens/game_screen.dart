@@ -138,7 +138,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 // Top bar
                 _buildTopBar(state),
                 // HUD
-                _buildHUD(state),
+                _buildHUD(state, controller),
                 const SizedBox(height: 8),
                 // Grid
                 Expanded(
@@ -147,7 +147,21 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: NonogramGridWidget(
                         state: state,
-                        onCellTap: (row, col) => controller.tapCell(row, col),
+                        onCellTap: (row, col) {
+                          controller.tapCell(row, col);
+                          // Auto-clear error cells after delay
+                          if (state.errorCells.isEmpty) {
+                            Future.delayed(const Duration(milliseconds: 600), () {
+                              if (mounted) controller.clearErrors();
+                            });
+                          }
+                        },
+                        onHintTap: (row, col) {
+                          final used = controller.useHintOnCell(row, col);
+                          if (used) {
+                            HapticFeedback.mediumImpact();
+                          }
+                        },
                       ),
                     ),
                   ),
@@ -232,7 +246,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  Widget _buildHUD(NonogramState state) {
+  Widget _buildHUD(NonogramState state, GameController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
@@ -270,6 +284,39 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               color: Color(0xFF00E676),
               fontSize: 10,
               fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Hint button
+          GestureDetector(
+            onTap: () {
+              if (state.isHintMode) {
+                controller.exitHintMode();
+              } else {
+                controller.enterHintMode();
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: state.isHintMode
+                    ? AppColors.primary.withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: state.isHintMode
+                      ? AppColors.primary.withValues(alpha: 0.5)
+                      : Colors.white.withValues(alpha: 0.1),
+                ),
+              ),
+              child: Text(
+                state.isHintMode ? 'TAP CELL' : '\u{1F4A1} HINT',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: state.isHintMode ? AppColors.primary : AppColors.textSecondary,
+                ),
+              ),
             ),
           ),
         ],
