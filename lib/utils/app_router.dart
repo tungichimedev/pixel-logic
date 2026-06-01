@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../screens/home_screen.dart';
+import '../screens/main_shell.dart';
 import '../screens/pack_select_screen.dart';
 import '../screens/game_screen.dart';
 
@@ -9,7 +9,7 @@ final appRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) => const MainShell(),
     ),
     GoRoute(
       path: '/pack/:packId',

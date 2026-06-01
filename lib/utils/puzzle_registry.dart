@@ -8,14 +8,14 @@ class PuzzleRegistry {
       id: 'animals',
       name: 'Animals',
       emoji: '\u{1F431}',
-      puzzles: _animalsPuzzles,
+      puzzles: SamplePuzzles.allAnimals,
     ),
     PuzzlePack(
       id: 'space',
       name: 'Space',
       emoji: '\u{1F680}',
-      puzzles: _spacePuzzles,
-      unlockRequirement: 3, // complete 3 animals puzzles
+      puzzles: SamplePuzzles.allSpace,
+      unlockRequirement: 5,
     ),
   ];
 
@@ -45,59 +45,4 @@ class PuzzleRegistry {
     }
     return null;
   }
-
-  static final _animalsPuzzles = [
-    SamplePuzzles.heart5x5,
-    SamplePuzzles.star5x5,
-    SamplePuzzles.arrow5x5,
-    NonogramPuzzle.fromPixelGrid(
-      id: 'fish_5x5', title: 'Fish', packId: 'animals', orderIndex: 3,
-      grid: [
-        [0, 0, 1, 0, 0],
-        [0, 1, 1, 1, 0],
-        [1, 1, 1, 1, 1],
-        [0, 1, 1, 1, 0],
-        [0, 0, 1, 0, 0],
-      ],
-      parTimeSeconds: 60, difficulty: 1,
-    ),
-    NonogramPuzzle.fromPixelGrid(
-      id: 'tree_5x5', title: 'Tree', packId: 'animals', orderIndex: 4,
-      grid: [
-        [0, 0, 1, 0, 0],
-        [0, 1, 1, 1, 0],
-        [1, 1, 1, 1, 1],
-        [0, 1, 1, 1, 0],
-        [0, 0, 1, 0, 0],
-      ],
-      parTimeSeconds: 60, difficulty: 1,
-    ),
-    SamplePuzzles.cat10x10,
-  ];
-
-  static final _spacePuzzles = [
-    SamplePuzzles.rocket10x10,
-    NonogramPuzzle.fromPixelGrid(
-      id: 'planet_5x5', title: 'Planet', packId: 'space', orderIndex: 1,
-      grid: [
-        [0, 1, 1, 1, 0],
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [0, 1, 1, 1, 0],
-      ],
-      parTimeSeconds: 45, difficulty: 1,
-    ),
-    NonogramPuzzle.fromPixelGrid(
-      id: 'ufo_5x5', title: 'UFO', packId: 'space', orderIndex: 2,
-      grid: [
-        [0, 1, 1, 1, 0],
-        [1, 1, 1, 1, 1],
-        [0, 1, 0, 1, 0],
-        [0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0],
-      ],
-      parTimeSeconds: 60, difficulty: 1,
-    ),
-  ];
 }
