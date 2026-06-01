@@ -2,13 +2,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../controllers/game_controller.dart';
+import '../controllers/progress_controller.dart';
 import '../models/nonogram_state.dart';
-import '../utils/sample_puzzles.dart';
+import '../models/puzzle_pack.dart';
+import '../utils/app_theme.dart';
+import '../utils/puzzle_registry.dart';
 import '../widgets/nonogram_grid_widget.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
-  const GameScreen({super.key});
+  final String puzzleId;
+
+  const GameScreen({super.key, required this.puzzleId});
 
   @override
   ConsumerState<GameScreen> createState() => _GameScreenState();
@@ -23,6 +29,13 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   void initState() {
     super.initState();
     _startTimer();
+    // Load the puzzle
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final puzzle = PuzzleRegistry.findById(widget.puzzleId);
+      if (puzzle != null) {
+        ref.read(gameControllerProvider.notifier).loadPuzzle(puzzle);
+      }
+    });
   }
 
   @override
@@ -64,6 +77,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     ref.listen(gameControllerProvider, (prev, next) {
       if (next.isComplete && !(prev?.isComplete ?? false)) {
         HapticFeedback.heavyImpact();
+        _timer?.cancel();
+        // Save result
+        final result = PuzzleResult(
+          puzzleId: next.puzzle.id,
+          starsEarned: _calculateStars(next),
+          timeSeconds: _elapsedSeconds,
+          score: _calculateScore(next),
+          mistakes: next.mistakes,
+        );
+        ref.read(progressProvider.notifier).completePuzzle(
+          result,
+          gridSize: next.puzzle.gridSize,
+        );
         setState(() => _showComplete = true);
       }
     });
@@ -96,9 +122,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 ),
                 // Mode toggle
                 _buildModeToggle(state, controller),
-                const SizedBox(height: 8),
-                // Puzzle selector
-                _buildPuzzleSelector(controller),
                 const SizedBox(height: 16),
               ],
             ),
@@ -139,7 +162,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
   Widget _buildTopBar(NonogramState state) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
@@ -147,8 +170,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       ),
       child: Row(
         children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+            onPressed: () => context.pop(),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          ),
           Text(
-            '${state.puzzle.packId.toUpperCase()} • ${state.puzzle.title}',
+            '${state.puzzle.packId.toUpperCase()} \u2022 ${state.puzzle.title}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,
@@ -159,7 +188,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           Text(
             '${state.puzzle.gridSize}x${state.puzzle.gridSize}',
             style: const TextStyle(
-              color: Color(0xFF9999CC),
+              color: AppColors.textSecondary,
               fontSize: 10,
               fontWeight: FontWeight.w700,
             ),
@@ -283,43 +312,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  Widget _buildPuzzleSelector(GameController controller) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (final puzzle in SamplePuzzles.all)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: GestureDetector(
-              onTap: () {
-                controller.loadPuzzle(puzzle);
-                _startTimer();
-                setState(() => _showComplete = false);
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.07),
-                  borderRadius: BorderRadius.circular(12),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.12)),
-                ),
-                child: Text(
-                  '${puzzle.title} ${puzzle.gridSize}x${puzzle.gridSize}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
   Widget _buildCompletionOverlay(NonogramState state, GameController controller) {
     final score = _calculateScore(state);
     final stars = _calculateStars(state);
@@ -414,13 +406,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               // Next puzzle button
               GestureDetector(
                 onTap: () {
-                  final puzzles = SamplePuzzles.all;
-                  final currentIdx = puzzles
-                      .indexWhere((p) => p.id == state.puzzle.id);
-                  final nextIdx = (currentIdx + 1) % puzzles.length;
-                  controller.loadPuzzle(puzzles[nextIdx]);
-                  _startTimer();
-                  setState(() => _showComplete = false);
+                  final next = PuzzleRegistry.nextPuzzle(state.puzzle.id);
+                  if (next != null) {
+                    controller.loadPuzzle(next);
+                    _startTimer();
+                    setState(() => _showComplete = false);
+                  } else {
+                    context.pop(); // Back to pack select
+                  }
                 },
                 child: Container(
                   width: double.infinity,
