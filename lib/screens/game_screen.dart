@@ -12,6 +12,7 @@ import '../models/puzzle_pack.dart';
 import '../utils/app_theme.dart';
 import '../utils/puzzle_registry.dart';
 import '../widgets/nonogram_grid_widget.dart';
+import '../widgets/pixel_art_reveal.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   final String puzzleId;
@@ -565,7 +566,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   letterSpacing: 2,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              // Pixel art reveal
+              PixelArtReveal(puzzle: state.puzzle),
+              const SizedBox(height: 12),
               // Stars
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
