@@ -15,7 +15,8 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      body: GradientBackground(
+        child: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 24),
@@ -24,24 +25,14 @@ class HomeScreen extends ConsumerWidget {
               shaderCallback: (bounds) => const LinearGradient(
                 colors: [Color(0xFFFFE88A), Color(0xFFFFD84B), Color(0xFFFF9500)],
               ).createShader(bounds),
-              child: const Text(
+              child: Text(
                 'PIXEL LOGIC',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 3,
-                ),
+                style: AppFonts.pixel(fontSize: 18, color: Colors.white, letterSpacing: 2),
               ),
             ),
-            const Text(
+            Text(
               'NONOGRAM PUZZLES',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 4,
-              ),
+              style: AppFonts.pixel(fontSize: 6, color: AppColors.textSecondary, letterSpacing: 3),
             ),
             const SizedBox(height: 8),
             // Mini heart decoration
@@ -82,6 +73,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -148,7 +140,7 @@ class HomeScreen extends ConsumerWidget {
                         : '${daily.puzzle.gridSize}x${daily.puzzle.gridSize} \u2022 +100 XP \u2022 +1 Hint',
                     style: const TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 9,
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

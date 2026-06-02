@@ -28,7 +28,8 @@ class PackSelectScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      body: GradientBackground(
+        child: SafeArea(
         child: Column(
           children: [
             // Header
@@ -120,7 +121,7 @@ class PackSelectScreen extends ConsumerWidget {
                   crossAxisCount: 3,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 0.85,
+                  childAspectRatio: 0.75,
                 ),
                 itemCount: pack.puzzles.length,
                 itemBuilder: (context, index) {
@@ -143,6 +144,7 @@ class PackSelectScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -220,15 +222,16 @@ class PackSelectScreen extends ConsumerWidget {
               title,
               style: TextStyle(
                 color: locked ? AppColors.textMuted : AppColors.textSecondary,
-                fontSize: 9,
+                fontSize: 11,
                 fontWeight: FontWeight.w700,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
             Text(
               '${gridSize}x$gridSize',
               style: TextStyle(
-                color: locked ? AppColors.textMuted : AppColors.textMuted,
-                fontSize: 8,
+                color: locked ? AppColors.textMuted : AppColors.textSecondary,
+                fontSize: 10,
                 fontWeight: FontWeight.w700,
               ),
             ),

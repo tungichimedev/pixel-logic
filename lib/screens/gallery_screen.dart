@@ -28,19 +28,15 @@ class GalleryScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      body: GradientBackground(
+        child: SafeArea(
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Text(
                 'GALLERY',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
+                style: AppFonts.pixel(fontSize: 12, color: AppColors.primary, letterSpacing: 2),
               ),
             ),
             // Summary
@@ -70,20 +66,32 @@ class GalleryScreen extends ConsumerWidget {
             // Gallery grid
             Expanded(
               child: completedPuzzles.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.collections_rounded, size: 48, color: AppColors.textMuted),
-                          SizedBox(height: 8),
-                          Text(
+                          const Icon(Icons.collections_rounded, size: 48, color: AppColors.textMuted),
+                          const SizedBox(height: 8),
+                          const Text(
                             'No puzzles completed yet',
                             style: TextStyle(color: AppColors.textMuted, fontSize: 14, fontWeight: FontWeight.w700),
                           ),
-                          SizedBox(height: 4),
-                          Text(
+                          const SizedBox(height: 4),
+                          const Text(
                             'Solve puzzles to build your collection!',
                             style: TextStyle(color: AppColors.textMuted, fontSize: 10, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text(
+                              'START YOUR FIRST PUZZLE \u2192',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -105,6 +113,7 @@ class GalleryScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

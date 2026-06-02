@@ -37,7 +37,7 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth - _clueWidth - 8;
-        _cellSize = (availableWidth / gridSize).clamp(28.0, 48.0);
+        _cellSize = (availableWidth / gridSize).clamp(32.0, 52.0);
         final gridPixelSize = _cellSize * gridSize + gridSize; // +gaps
 
         return GestureDetector(

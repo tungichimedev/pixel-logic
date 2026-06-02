@@ -44,9 +44,11 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     if (!_loaded) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppColors.background,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: const GradientBackground(
+          child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        ),
       );
     }
 

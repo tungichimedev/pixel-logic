@@ -80,21 +80,17 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      body: GradientBackground(
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
               const SizedBox(height: 32),
               // Title
-              const Text(
+              Text(
                 'HOW TO PLAY',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
+                style: AppFonts.pixel(fontSize: 14, color: AppColors.primary, letterSpacing: 2),
               ),
               const SizedBox(height: 32),
               // Step title
@@ -120,6 +116,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
               const SizedBox(height: 32),
               // Tutorial grid
               _buildTutorialGrid(),
+              const SizedBox(height: 24),
+              // Step-specific visual hint
+              _buildStepVisual(),
               const Spacer(),
               // Progress dots
               Row(
@@ -132,7 +131,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     decoration: BoxDecoration(
                       color: i == _step
                           ? AppColors.primary
-                          : AppColors.textMuted.withValues(alpha: 0.3),
+                          : AppColors.textMuted.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   );
@@ -143,17 +142,17 @@ class _TutorialScreenState extends State<TutorialScreen> {
               Row(
                 children: [
                   // Skip
-                  GestureDetector(
-                    onTap: _completeTutorial,
-                    child: const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Text(
-                        'Skip',
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
+                  TextButton(
+                    onPressed: _completeTutorial,
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                    child: const Text(
+                      'Skip',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -199,6 +198,46 @@ class _TutorialScreenState extends State<TutorialScreen> {
             ],
           ),
         ),
+      ),
+      ),
+    );
+  }
+
+  Widget _buildStepVisual() {
+    final visuals = [
+      // Step 0: Read clues
+      (icon: Icons.arrow_upward_rounded, text: 'Look at the numbers above and to the left', color: AppColors.primary),
+      // Step 1: Fill cells
+      (icon: Icons.touch_app_rounded, text: 'Tap the bottom row to fill all 3 cells', color: AppColors.cellFilled),
+      // Step 2: Check satisfaction
+      (icon: Icons.check_circle_outline_rounded, text: 'Green clues mean that row or column is correct', color: AppColors.satisfied),
+      // Step 3: Solve
+      (icon: Icons.emoji_events_rounded, text: 'Fill the left column to complete the puzzle!', color: AppColors.primary),
+    ];
+    final v = visuals[_step];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: v.color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: v.color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(v.icon, color: v.color, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              v.text,
+              style: TextStyle(
+                color: v.color,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

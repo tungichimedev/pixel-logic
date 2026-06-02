@@ -24,20 +24,16 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      body: GradientBackground(
+        child: SafeArea(
         child: Column(
           children: [
             // Header
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Text(
                 'SETTINGS',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
+                style: AppFonts.pixel(fontSize: 12, color: AppColors.primary, letterSpacing: 2),
               ),
             ),
             Expanded(
@@ -97,6 +93,7 @@ class SettingsScreen extends ConsumerWidget {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -141,14 +138,11 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
           const Spacer(),
-          SizedBox(
-            height: 24,
-            child: Switch.adaptive(
+          Switch.adaptive(
               value: value,
               onChanged: onChanged,
               activeTrackColor: AppColors.satisfied,
             ),
-          ),
         ],
       ),
     );
@@ -250,7 +244,7 @@ class SettingsScreen extends ConsumerWidget {
               gradient: const LinearGradient(colors: AppColors.primaryGradient),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Text('\$4.99/mo',
+            child: const Text('PRO',
                 style: TextStyle(color: Color(0xFF1a0a00), fontSize: 11, fontWeight: FontWeight.w900)),
           ),
         ],

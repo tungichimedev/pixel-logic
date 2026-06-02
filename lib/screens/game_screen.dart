@@ -69,11 +69,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   }
 
   double _completionProgress(NonogramState state) {
-    int satisfiedRows = 0;
-    for (int r = 0; r < state.puzzle.gridSize; r++) {
-      if (state.isRowSatisfied(r)) satisfiedRows++;
-    }
-    return satisfiedRows / state.puzzle.gridSize;
+    return _totalSatisfied(state) / (state.puzzle.gridSize * 2);
   }
 
   @override
@@ -128,8 +124,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0C29),
-      body: SafeArea(
+      backgroundColor: AppColors.background,
+      body: GradientBackground(
+        child: SafeArea(
         child: Stack(
           children: [
             Column(
@@ -179,13 +176,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           ],
         ),
       ),
+      ),
     );
   }
 
   Widget _buildProgressBar(NonogramState state) {
     final progress = _completionProgress(state);
     return Container(
-      height: 3,
+      height: 6,
       decoration: const BoxDecoration(
         color: Color(0xFF1a1850),
       ),
@@ -226,7 +224,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
           ),
           Text(
-            '${state.puzzle.packId.toUpperCase()} \u2022 ${state.puzzle.title}',
+            '${PuzzleRegistry.findPackById(state.puzzle.packId)?.name ?? state.puzzle.packId} / ${state.puzzle.title}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,
@@ -278,9 +276,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             ),
           ),
           const Spacer(),
-          // Rows completed
+          // Satisfied constraints
           Text(
-            '${_satisfiedRowCount(state)}/${state.puzzle.gridSize} rows',
+            '${_totalSatisfied(state)}/${state.puzzle.gridSize * 2}',
             style: const TextStyle(
               color: Color(0xFF00E676),
               fontSize: 10,
@@ -325,17 +323,20 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  int _satisfiedRowCount(NonogramState state) {
+  int _totalSatisfied(NonogramState state) {
     int count = 0;
     for (int r = 0; r < state.puzzle.gridSize; r++) {
       if (state.isRowSatisfied(r)) count++;
+    }
+    for (int c = 0; c < state.puzzle.gridSize; c++) {
+      if (state.isColSatisfied(c)) count++;
     }
     return count;
   }
 
   Widget _buildModeToggle(NonogramState state, GameController controller) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 40),
+      margin: const EdgeInsets.symmetric(horizontal: 24),
       height: 44,
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.3),
@@ -396,7 +397,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
   Widget _buildZeroLivesOverlay(GameController controller) {
     return Container(
-      color: const Color(0xFF0F0C29).withValues(alpha: 0.85),
+      color: AppColors.background.withValues(alpha: 0.85),
       child: Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 40),
@@ -517,8 +518,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final score = _calculateScore(state);
     final stars = _calculateStars(state);
 
-    return Container(
-      color: const Color(0xFF0F0C29).withValues(alpha: 0.85),
+    return AnimatedOpacity(
+      opacity: 1.0,
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+      color: AppColors.background.withValues(alpha: 0.85),
       child: Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 32),
@@ -544,10 +548,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               // Title
               Text(
                 'PUZZLE SOLVED!',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
+                style: AppFonts.pixel(
+                  fontSize: 12,
                   color: const Color(0xFF00E676),
+                  letterSpacing: 1,
+                ).copyWith(
                   shadows: [
                     Shadow(
                       color: const Color(0xFF00E676).withValues(alpha: 0.6),
@@ -638,20 +643,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'NEXT PUZZLE',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF1a0a00),
+                        style: AppFonts.pixel(
+                          fontSize: 9,
+                          color: const Color(0xFF1a0a00),
                           letterSpacing: 2,
                         ),
                       ),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward_rounded,
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward_rounded,
                           size: 18, color: Color(0xFF1a0a00)),
                     ],
                   ),
@@ -660,6 +664,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
