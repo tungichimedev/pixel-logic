@@ -230,9 +230,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
   Widget _buildTopBar(NonogramState state) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
+          bottom: BorderSide(color: Color(0x12FFFFFF)),
         ),
       ),
       child: Row(

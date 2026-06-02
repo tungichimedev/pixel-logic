@@ -5,13 +5,20 @@ import '../models/nonogram_puzzle.dart';
 import '../utils/app_theme.dart';
 import '../utils/puzzle_registry.dart';
 
-class GalleryScreen extends ConsumerWidget {
+class GalleryScreen extends ConsumerStatefulWidget {
   const GalleryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GalleryScreen> createState() => _GalleryScreenState();
+}
+
+class _GalleryScreenState extends ConsumerState<GalleryScreen> {
+  String _filterPack = 'all'; // 'all', pack id
+
+  @override
+  Widget build(BuildContext context) {
     final progress = ref.watch(progressProvider);
-    final completedPuzzles = <({String title, String packName, int stars, int gridSize, NonogramPuzzle puzzle})>[];
+    final completedPuzzles = <({String title, String packName, String packId, int stars, int gridSize, NonogramPuzzle puzzle})>[];
 
     for (final pack in PuzzleRegistry.packs) {
       for (final puzzle in pack.puzzles) {
@@ -20,6 +27,7 @@ class GalleryScreen extends ConsumerWidget {
           completedPuzzles.add((
             title: puzzle.title,
             packName: pack.name,
+            packId: pack.id,
             stars: result.starsEarned,
             gridSize: puzzle.gridSize,
             puzzle: puzzle,
@@ -27,6 +35,10 @@ class GalleryScreen extends ConsumerWidget {
         }
       }
     }
+
+    final filtered = _filterPack == 'all'
+        ? completedPuzzles
+        : completedPuzzles.where((p) => p.packId == _filterPack).toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -64,10 +76,27 @@ class GalleryScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            // Pack filter chips
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  _filterChip('all', 'ALL'),
+                  const SizedBox(width: 6),
+                  ...PuzzleRegistry.packs.map((pack) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: _filterChip(pack.id, pack.name),
+                    );
+                  }),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
             // Gallery grid
             Expanded(
-              child: completedPuzzles.isEmpty
+              child: filtered.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -106,9 +135,9 @@ class GalleryScreen extends ConsumerWidget {
                         crossAxisSpacing: 12,
                         childAspectRatio: 0.9,
                       ),
-                      itemCount: completedPuzzles.length,
+                      itemCount: filtered.length,
                       itemBuilder: (context, index) {
-                        final p = completedPuzzles[index];
+                        final p = filtered[index];
                         return _galleryTile(p.title, p.packName, p.stars, p.gridSize, p.puzzle);
                       },
                     ),
@@ -116,6 +145,35 @@ class GalleryScreen extends ConsumerWidget {
           ],
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _filterChip(String id, String label) {
+    final active = _filterPack == id;
+    return GestureDetector(
+      onTap: () => setState(() => _filterPack = id),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: active
+              ? AppColors.primary.withValues(alpha: 0.12)
+              : Colors.white.withValues(alpha: 0.04),
+          border: Border.all(
+            color: active
+                ? AppColors.primary.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.08),
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? AppColors.primary : AppColors.textSecondary,
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
     );
   }
@@ -132,7 +190,14 @@ class GalleryScreen extends ConsumerWidget {
   Widget _galleryTile(String title, String packName, int stars, int gridSize, NonogramPuzzle puzzle) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.satisfied.withValues(alpha: 0.08),
+            AppColors.surface,
+          ],
+        ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.satisfied.withValues(alpha: 0.25)),
       ),

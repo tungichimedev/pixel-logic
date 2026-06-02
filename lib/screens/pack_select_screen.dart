@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/progress_controller.dart';
+import '../models/nonogram_puzzle.dart';
 import '../utils/app_theme.dart';
 import '../utils/puzzle_registry.dart';
 
@@ -134,7 +135,7 @@ class PackSelectScreen extends ConsumerWidget {
                               pack.puzzles[index - 1].id));
 
                   return _buildPuzzleTile(
-                    context, puzzle.title, puzzle.gridSize,
+                    context, puzzle, puzzle.title, puzzle.gridSize,
                     index + 1, isCompleted, isNext,
                     result?.starsEarned ?? 0,
                     () => context.push('/play/${puzzle.id}'),
@@ -151,7 +152,7 @@ class PackSelectScreen extends ConsumerWidget {
 
   Widget _buildPuzzleTile(
     BuildContext context,
-    String title, int gridSize,
+    NonogramPuzzle puzzle, String title, int gridSize,
     int number, bool completed, bool isNext, int stars,
     VoidCallback onTap,
   ) {
@@ -188,8 +189,7 @@ class PackSelectScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (completed)
-              const Icon(Icons.check_circle_rounded,
-                  color: AppColors.satisfied, size: 24),
+              _buildMiniPixelArt(puzzle),
             if (locked)
               Icon(Icons.lock_rounded,
                   color: AppColors.textMuted, size: 24),
@@ -252,6 +252,35 @@ class PackSelectScreen extends ConsumerWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMiniPixelArt(NonogramPuzzle puzzle) {
+    final size = puzzle.gridSize;
+    final cellPx = size <= 5 ? 5.0 : 3.0;
+    return SizedBox(
+      width: cellPx * size + size - 1,
+      height: cellPx * size + size - 1,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(size, (r) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(size, (c) {
+              final isFilled = puzzle.solution[r][c] > 0;
+              return Container(
+                width: cellPx,
+                height: cellPx,
+                margin: const EdgeInsets.all(0.5),
+                decoration: BoxDecoration(
+                  color: isFilled ? AppColors.cellFilled : Colors.transparent,
+                  borderRadius: BorderRadius.circular(0.5),
+                ),
+              );
+            }),
+          );
+        }),
       ),
     );
   }
