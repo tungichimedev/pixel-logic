@@ -56,8 +56,14 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
                   child: Row(
                     children: List.generate(gridSize, (col) {
                       final satisfied = widget.state.isColSatisfied(col);
-                      return SizedBox(
+                      return Container(
                         width: _cellSize,
+                        decoration: satisfied
+                            ? BoxDecoration(
+                                color: const Color(0xFF00E676).withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(3),
+                              )
+                            : null,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: widget.state.puzzle.colClues[col].runs
@@ -94,6 +100,13 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
                                 color: const Color(0xFF00E676)
                                     .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF00E676)
+                                        .withValues(alpha: 0.15),
+                                    blurRadius: 6,
+                                  ),
+                                ],
                               )
                             : null,
                         padding: const EdgeInsets.symmetric(
