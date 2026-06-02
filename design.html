@@ -2471,85 +2471,231 @@ h1 {
         <div class="screen-label">Screen 6 — Gallery</div>
       </div>
 
-      <!-- ─── SCREEN 7: TUTORIAL ─── -->
+      <!-- ─── SCREEN 7a: TUTORIAL — Step 1: Read the Clues ─── -->
       <div class="screen-wrap">
         <div class="phone">
-          <div class="status-bar">
-            <span>9:41</span>
-            <span>&#9679;&#9679;&#9679; 100%</span>
-          </div>
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679; 100%</span></div>
+          <div class="s7-topbar"><div class="s7-title" style="font-size:11px;">HOW TO PLAY</div></div>
 
-          <!-- Fix 1: pixel font for HOW TO PLAY -->
-          <div class="s7-topbar">
-            <div class="s7-title">HOW TO<br>PLAY</div>
+          <!-- Step title -->
+          <div style="text-align:center;margin:8px 0 4px;">
+            <div style="color:#fff;font-size:14px;font-weight:900;">Read the Clues</div>
           </div>
+          <div class="s7-instruction">Numbers on the left and top tell you how many cells to fill in each row and column.</div>
 
-          <div class="s7-instruction">
-            Tap cells to fill them based on<br>the number clues on each row &amp; column
-          </div>
-
-          <!-- Tutorial grid with clues + tooltip -->
+          <!-- 3x3 grid — L shape, all empty -->
           <div style="display:flex;justify-content:center;margin-top:16px;">
             <div style="position:relative;">
-              <!-- Column clues -->
               <div style="display:flex;margin-left:32px;margin-bottom:2px;">
-                <div class="s7clue">1</div>
-                <div class="s7clue">3</div>
-                <div class="s7clue">3</div>
-                <div class="s7clue">3</div>
-                <div class="s7clue">1</div>
+                <div class="s7clue highlight">3</div>
+                <div class="s7clue highlight">1</div>
+                <div class="s7clue highlight">1</div>
               </div>
-              <!-- Grid + row clues -->
               <div style="display:flex;flex-direction:column;gap:2px;">
                 <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue highlight" style="width:32px;justify-content:flex-end;">1</div>
+                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue highlight" style="width:32px;justify-content:flex-end;">1</div>
+                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:2px;">
                   <div class="s7clue highlight" style="width:32px;justify-content:flex-end;">3</div>
-                  <div class="s7cell empty"></div><div class="s7cell filled"></div><div class="s7cell filled"></div><div class="s7cell filled"></div><div class="s7cell empty"></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:2px;">
-                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
-                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell filled"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:2px;">
-                  <div class="s7clue" style="width:32px;justify-content:flex-end;">3</div>
-                  <div class="s7cell empty"></div><div class="s7cell filled"></div><div class="s7cell filled"></div><div class="s7cell pulse"></div><div class="s7cell empty"></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:2px;">
-                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
-                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:2px;">
-                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
-                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
                 </div>
               </div>
-
-              <!-- Tooltip pointing at the "3" row clue -->
-              <div class="tutorial-tooltip">
-                <div class="tooltip-text">"3" means fill<br>3 consecutive<br>cells in this row</div>
+              <!-- Tooltip -->
+              <div class="tutorial-tooltip" style="top:10px;">
+                <div class="tooltip-text">These numbers<br>are your clues!</div>
                 <div class="tooltip-arrow"></div>
               </div>
             </div>
           </div>
 
-          <!-- Tap here label -->
-          <div style="text-align:center;color:#FFD84B;font-size:9px;font-weight:800;margin-top:8px;letter-spacing:0.5px;">
-            &#9757; Tap the highlighted cell
+          <!-- Step visual hint -->
+          <div style="margin:20px 20px 0;padding:12px 16px;background:rgba(255,216,75,0.08);border:1px solid rgba(255,216,75,0.2);border-radius:14px;display:flex;align-items:center;gap:10px;">
+            <div style="font-size:20px;">&#8593;</div>
+            <div style="color:#FFD84B;font-size:10px;font-weight:700;line-height:1.4;">Look at the numbers above and to the left</div>
           </div>
+
+          <!-- Spacer -->
+          <div style="flex:1;"></div>
 
           <!-- Progress dots -->
           <div class="s7-progress-dots">
-            <div class="s7-dot active"></div>
-            <div class="s7-dot"></div>
-            <div class="s7-dot"></div>
-            <div class="s7-dot"></div>
+            <div class="s7-dot active"></div><div class="s7-dot"></div><div class="s7-dot"></div><div class="s7-dot"></div>
           </div>
-
-          <div style="display:flex;justify-content:center;">
+          <div style="display:flex;justify-content:space-between;padding:0 20px;align-items:center;margin-bottom:16px;">
+            <div class="s7-skip">Skip</div>
             <div class="s7-next-btn">NEXT <svg width="14" height="14" viewBox="0 0 14 14" style="margin-left:4px;vertical-align:middle;"><path d="M1 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
           </div>
-          <div class="s7-skip">Skip tutorial</div>
         </div>
-        <div class="screen-label">Screen 7 — Tutorial</div>
+        <div class="screen-label">Tutorial 1 — Read Clues</div>
+      </div>
+
+      <!-- ─── SCREEN 7b: TUTORIAL — Step 2: Fill Cells ─── -->
+      <div class="screen-wrap">
+        <div class="phone">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679; 100%</span></div>
+          <div class="s7-topbar"><div class="s7-title" style="font-size:11px;">HOW TO PLAY</div></div>
+
+          <div style="text-align:center;margin:8px 0 4px;">
+            <div style="color:#fff;font-size:14px;font-weight:900;">Fill Cells</div>
+          </div>
+          <div class="s7-instruction">Tap a cell to fill it. The clue "3" means fill 3 cells in a row.</div>
+
+          <!-- 3x3 grid — bottom row highlighted, ready to fill -->
+          <div style="display:flex;justify-content:center;margin-top:16px;">
+            <div>
+              <div style="display:flex;margin-left:32px;margin-bottom:2px;">
+                <div class="s7clue">3</div>
+                <div class="s7clue">1</div>
+                <div class="s7clue">1</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
+                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
+                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue highlight" style="width:32px;justify-content:flex-end;">3</div>
+                  <div class="s7cell pulse"></div><div class="s7cell pulse"></div><div class="s7cell pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step visual hint -->
+          <div style="margin:20px 20px 0;padding:12px 16px;background:rgba(68,136,255,0.08);border:1px solid rgba(68,136,255,0.2);border-radius:14px;display:flex;align-items:center;gap:10px;">
+            <div style="font-size:20px;">&#9757;</div>
+            <div style="color:#4488FF;font-size:10px;font-weight:700;line-height:1.4;">Tap the bottom row to fill all 3 cells</div>
+          </div>
+
+          <div style="flex:1;"></div>
+
+          <div class="s7-progress-dots">
+            <div class="s7-dot"></div><div class="s7-dot active"></div><div class="s7-dot"></div><div class="s7-dot"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:0 20px;align-items:center;margin-bottom:16px;">
+            <div class="s7-skip">Skip</div>
+            <div class="s7-next-btn">NEXT <svg width="14" height="14" viewBox="0 0 14 14" style="margin-left:4px;vertical-align:middle;"><path d="M1 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+          </div>
+        </div>
+        <div class="screen-label">Tutorial 2 — Fill Cells</div>
+      </div>
+
+      <!-- ─── SCREEN 7c: TUTORIAL — Step 3: Check Satisfaction ─── -->
+      <div class="screen-wrap">
+        <div class="phone">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679; 100%</span></div>
+          <div class="s7-topbar"><div class="s7-title" style="font-size:11px;">HOW TO PLAY</div></div>
+
+          <div style="text-align:center;margin:8px 0 4px;">
+            <div style="color:#fff;font-size:14px;font-weight:900;">Check Satisfaction</div>
+          </div>
+          <div class="s7-instruction">When a row or column is correctly filled, the clue turns green!</div>
+
+          <!-- 3x3 grid — bottom row filled, clue "3" satisfied (green) -->
+          <div style="display:flex;justify-content:center;margin-top:16px;">
+            <div>
+              <div style="display:flex;margin-left:32px;margin-bottom:2px;">
+                <div class="s7clue" style="color:#00E676;">3</div>
+                <div class="s7clue">1</div>
+                <div class="s7clue">1</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
+                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
+                  <div class="s7cell empty"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue" style="width:32px;justify-content:flex-end;color:#00E676;background:rgba(0,230,118,0.1);border-radius:4px;">3</div>
+                  <div class="s7cell filled"></div><div class="s7cell filled"></div><div class="s7cell filled"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step visual hint -->
+          <div style="margin:20px 20px 0;padding:12px 16px;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:14px;display:flex;align-items:center;gap:10px;">
+            <div style="font-size:20px;">&#10003;</div>
+            <div style="color:#00E676;font-size:10px;font-weight:700;line-height:1.4;">Green clues mean that row or column is correct</div>
+          </div>
+
+          <div style="flex:1;"></div>
+
+          <div class="s7-progress-dots">
+            <div class="s7-dot"></div><div class="s7-dot"></div><div class="s7-dot active"></div><div class="s7-dot"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:0 20px;align-items:center;margin-bottom:16px;">
+            <div class="s7-skip">Skip</div>
+            <div class="s7-next-btn">NEXT <svg width="14" height="14" viewBox="0 0 14 14" style="margin-left:4px;vertical-align:middle;"><path d="M1 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+          </div>
+        </div>
+        <div class="screen-label">Tutorial 3 — Satisfaction</div>
+      </div>
+
+      <!-- ─── SCREEN 7d: TUTORIAL — Step 4: Solve the Puzzle ─── -->
+      <div class="screen-wrap">
+        <div class="phone">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679; 100%</span></div>
+          <div class="s7-topbar"><div class="s7-title" style="font-size:11px;">HOW TO PLAY</div></div>
+
+          <div style="text-align:center;margin:8px 0 4px;">
+            <div style="color:#fff;font-size:14px;font-weight:900;">Solve the Puzzle!</div>
+          </div>
+          <div class="s7-instruction">Fill all the correct cells to reveal the hidden picture. Try completing this one!</div>
+
+          <!-- 3x3 grid — bottom row filled, left column pulsing to complete L shape -->
+          <div style="display:flex;justify-content:center;margin-top:16px;">
+            <div>
+              <div style="display:flex;margin-left:32px;margin-bottom:2px;">
+                <div class="s7clue" style="color:#00E676;">3</div>
+                <div class="s7clue">1</div>
+                <div class="s7clue">1</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
+                  <div class="s7cell pulse"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue" style="width:32px;justify-content:flex-end;">1</div>
+                  <div class="s7cell pulse"></div><div class="s7cell empty"></div><div class="s7cell empty"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <div class="s7clue" style="width:32px;justify-content:flex-end;color:#00E676;background:rgba(0,230,118,0.1);border-radius:4px;">3</div>
+                  <div class="s7cell filled"></div><div class="s7cell filled"></div><div class="s7cell filled"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step visual hint -->
+          <div style="margin:20px 20px 0;padding:12px 16px;background:rgba(255,216,75,0.08);border:1px solid rgba(255,216,75,0.2);border-radius:14px;display:flex;align-items:center;gap:10px;">
+            <div style="font-size:20px;">&#127942;</div>
+            <div style="color:#FFD84B;font-size:10px;font-weight:700;line-height:1.4;">Fill the left column to complete the puzzle!</div>
+          </div>
+
+          <div style="flex:1;"></div>
+
+          <div class="s7-progress-dots">
+            <div class="s7-dot"></div><div class="s7-dot"></div><div class="s7-dot"></div><div class="s7-dot active"></div>
+          </div>
+          <div style="display:flex;justify-content:center;padding:0 20px;margin-bottom:16px;">
+            <div class="s7-skip">Skip</div>
+          </div>
+        </div>
+        <div class="screen-label">Tutorial 4 — Solve</div>
       </div>
 
       <!-- ─── SCREEN 8: SETTINGS ─── -->
