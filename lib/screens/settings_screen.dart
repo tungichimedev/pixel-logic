@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../controllers/progress_controller.dart';
 import '../utils/app_theme.dart';
 
@@ -77,6 +78,13 @@ class SettingsScreen extends ConsumerWidget {
                     }, isDestructive: true),
                   ]),
                   const SizedBox(height: 16),
+                  _sectionLabel('PROGRESS'),
+                  _settingsGroup([
+                    _actionRow('Achievements', Icons.emoji_events_rounded, () {
+                      context.push('/achievements');
+                    }),
+                  ]),
+                  const SizedBox(height: 16),
                   _sectionLabel('ABOUT'),
                   _settingsGroup([
                     _infoRow('Version', '1.0.0 (prototype)'),
@@ -85,7 +93,7 @@ class SettingsScreen extends ConsumerWidget {
                   ]),
                   const SizedBox(height: 24),
                   // Pro banner
-                  _buildProBanner(),
+                  _buildProBanner(context),
                   const SizedBox(height: 32),
                 ],
               ),
@@ -211,8 +219,10 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProBanner() {
-    return Container(
+  Widget _buildProBanner(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/paywall'),
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -248,6 +258,7 @@ class SettingsScreen extends ConsumerWidget {
                 style: TextStyle(color: Color(0xFF1a0a00), fontSize: 11, fontWeight: FontWeight.w900)),
           ),
         ],
+      ),
       ),
     );
   }

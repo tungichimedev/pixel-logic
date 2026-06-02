@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -415,8 +416,11 @@ class _GameScreenState extends ConsumerState<GameScreen>
   }
 
   Widget _buildZeroLivesOverlay(GameController controller) {
-    return Container(
-      color: AppColors.background.withValues(alpha: 0.85),
+    return ClipRect(
+      child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+      child: Container(
+      color: AppColors.background.withValues(alpha: 0.7),
       child: Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 40),
@@ -530,6 +534,8 @@ class _GameScreenState extends ConsumerState<GameScreen>
           ),
         ),
       ),
+      ),
+      ),
     );
   }
 
@@ -537,11 +543,11 @@ class _GameScreenState extends ConsumerState<GameScreen>
     final score = _calculateScore(state);
     final stars = _calculateStars(state);
 
-    return AnimatedOpacity(
-      opacity: 1.0,
-      duration: const Duration(milliseconds: 300),
+    return ClipRect(
+      child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
       child: Container(
-      color: AppColors.background.withValues(alpha: 0.85),
+      color: AppColors.background.withValues(alpha: 0.7),
       child: Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 32),
@@ -686,6 +692,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
             ],
           ),
         ),
+      ),
       ),
       ),
     );

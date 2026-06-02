@@ -1,8 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_theme.dart';
 import 'home_screen.dart';
 import 'gallery_screen.dart';
+import 'onboarding_screen.dart';
 import 'settings_screen.dart';
 import 'tutorial_screen.dart';
 
@@ -15,21 +17,24 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+  bool _showOnboarding = false;
   bool _showTutorial = false;
   bool _loaded = false;
 
   @override
   void initState() {
     super.initState();
-    _checkTutorial();
+    _checkFirstLaunch();
   }
 
-  Future<void> _checkTutorial() async {
+  Future<void> _checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
-    final done = prefs.getBool('tutorial_complete') ?? false;
+    final onboardingDone = prefs.getBool('onboarding_complete') ?? false;
+    final tutorialDone = prefs.getBool('tutorial_complete') ?? false;
     if (mounted) {
       setState(() {
-        _showTutorial = !done;
+        _showOnboarding = !onboardingDone;
+        _showTutorial = onboardingDone && !tutorialDone;
         _loaded = true;
       });
     }
@@ -52,6 +57,15 @@ class _MainShellState extends State<MainShell> {
       );
     }
 
+    if (_showOnboarding) {
+      return OnboardingScreen(
+        onComplete: () => setState(() {
+          _showOnboarding = false;
+          _showTutorial = true;
+        }),
+      );
+    }
+
     if (_showTutorial) {
       return TutorialScreen(
         onComplete: () => setState(() => _showTutorial = false),
@@ -61,24 +75,29 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.background.withValues(alpha: 0.95),
-          border: Border(
-            top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: 56,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _navItem(0, Icons.home_rounded, 'HOME'),
-                _navItem(1, Icons.grid_view_rounded, 'GALLERY'),
-                _navItem(2, Icons.settings_rounded, 'SETTINGS'),
-              ],
+      bottomNavigationBar: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.background.withValues(alpha: 0.85),
+              border: const Border(
+                top: BorderSide(color: Color(0x12FFFFFF)),
+              ),
+            ),
+            child: SafeArea(
+              top: false,
+              child: SizedBox(
+                height: 56,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _navItem(0, Icons.home_rounded, 'HOME'),
+                    _navItem(1, Icons.grid_view_rounded, 'GALLERY'),
+                    _navItem(2, Icons.settings_rounded, 'SETTINGS'),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../screens/achievements_screen.dart';
 import '../screens/main_shell.dart';
 import '../screens/pack_select_screen.dart';
+import '../screens/paywall_screen.dart';
 import '../screens/game_screen.dart';
 
 final appRouter = GoRouter(
@@ -16,6 +18,14 @@ final appRouter = GoRouter(
       builder: (context, state) => PackSelectScreen(
         packId: state.pathParameters['packId']!,
       ),
+    ),
+    GoRoute(
+      path: '/paywall',
+      builder: (context, state) => const PaywallScreen(),
+    ),
+    GoRoute(
+      path: '/achievements',
+      builder: (context, state) => const AchievementsScreen(),
     ),
     GoRoute(
       path: '/play/:puzzleId',
