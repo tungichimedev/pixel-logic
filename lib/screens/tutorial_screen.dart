@@ -58,10 +58,19 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   void _tapCell(int row, int col) {
+    if (_step < 3) return; // Only allow tapping on solve step
     HapticFeedback.lightImpact();
     setState(() {
       _cells[row][col] = !_cells[row][col];
-      if (_isSolved && _step == 3) {
+      // If wrong cell is filled, flash red and reset
+      if (_cells[row][col] && !_solution[row][col]) {
+        HapticFeedback.heavyImpact();
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) setState(() => _cells[row][col] = false);
+        });
+        return;
+      }
+      if (_isSolved) {
         HapticFeedback.heavyImpact();
         _completeTutorial();
       }

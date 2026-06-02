@@ -23,15 +23,25 @@ class GameScreen extends ConsumerStatefulWidget {
   ConsumerState<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends ConsumerState<GameScreen> {
+class _GameScreenState extends ConsumerState<GameScreen>
+    with TickerProviderStateMixin {
   int _elapsedSeconds = 0;
   Timer? _timer;
   bool _showComplete = false;
   bool _showZeroLives = false;
+  late final List<AnimationController> _starControllers;
+  late final List<Animation<double>> _starAnimations;
 
   @override
   void initState() {
     super.initState();
+    _starControllers = List.generate(3, (i) => AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    ));
+    _starAnimations = _starControllers.map((c) =>
+      CurvedAnimation(parent: c, curve: Curves.elasticOut),
+    ).toList();
     _startTimer();
     // Load the puzzle
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -49,6 +59,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    for (final c in _starControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -111,6 +124,12 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         final progressState = ref.read(progressProvider);
         ref.read(achievementsProvider.notifier).checkAfterPuzzle(progressState, next.mistakes);
         setState(() => _showComplete = true);
+        // Staggered star animation
+        for (int i = 0; i < 3; i++) {
+          Future.delayed(Duration(milliseconds: 200 + i * 200), () {
+            if (mounted) _starControllers[i].forward(from: 0);
+          });
+        }
         // Show achievement popup after a delay
         Future.delayed(const Duration(milliseconds: 500), () {
           if (!mounted) return;
@@ -575,28 +594,31 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               // Pixel art reveal
               PixelArtReveal(puzzle: state.puzzle),
               const SizedBox(height: 12),
-              // Stars
+              // Stars (staggered animation)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(3, (i) {
                   final filled = i < stars;
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(
-                      Icons.star_rounded,
-                      size: 40,
-                      color: filled
-                          ? const Color(0xFFFFD84B)
-                          : const Color(0xFF2a2a5a),
-                      shadows: filled
-                          ? [
-                              Shadow(
-                                color: const Color(0xFFFFD84B)
-                                    .withValues(alpha: 0.6),
-                                blurRadius: 12,
-                              ),
-                            ]
-                          : null,
+                    child: ScaleTransition(
+                      scale: filled ? _starAnimations[i] : const AlwaysStoppedAnimation(1.0),
+                      child: Icon(
+                        Icons.star_rounded,
+                        size: 40,
+                        color: filled
+                            ? const Color(0xFFFFD84B)
+                            : const Color(0xFF2a2a5a),
+                        shadows: filled
+                            ? [
+                                Shadow(
+                                  color: const Color(0xFFFFD84B)
+                                      .withValues(alpha: 0.6),
+                                  blurRadius: 12,
+                                ),
+                              ]
+                            : null,
+                      ),
                     ),
                   );
                 }),

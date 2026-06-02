@@ -35,8 +35,8 @@ class HomeScreen extends ConsumerWidget {
               style: AppFonts.pixel(fontSize: 6, color: AppColors.textSecondary, letterSpacing: 3),
             ),
             const SizedBox(height: 8),
-            // Mini heart decoration
-            _buildMiniHeart(),
+            // Mini heart decoration with pulse
+            const _PulsingHeart(),
             const SizedBox(height: 12),
             // Daily puzzle banner
             _buildDailyBanner(context, ref),
@@ -167,46 +167,6 @@ class HomeScreen extends ConsumerWidget {
     return progress.results.keys
         .where((id) => prevPack.puzzles.any((p) => p.id == id))
         .length;
-  }
-
-  Widget _buildMiniHeart() {
-    const filled = Color(0xFFFF4F7B);
-    const empty = Color(0x15FFFFFF);
-    // 5x5 heart pattern
-    final pattern = [
-      [false, true, false, true, false],
-      [true, true, true, true, true],
-      [true, true, true, true, true],
-      [false, true, true, true, false],
-      [false, false, true, false, false],
-    ];
-
-    return SizedBox(
-      width: 54,
-      height: 54,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: pattern.map((row) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: row.map((isFilled) {
-              return Container(
-                width: 9,
-                height: 9,
-                margin: const EdgeInsets.all(0.5),
-                decoration: BoxDecoration(
-                  color: isFilled ? filled : empty,
-                  borderRadius: BorderRadius.circular(1.5),
-                  boxShadow: isFilled
-                      ? [BoxShadow(color: filled.withValues(alpha: 0.4), blurRadius: 3)]
-                      : null,
-                ),
-              );
-            }).toList(),
-          );
-        }).toList(),
-      ),
-    );
   }
 
   Widget _buildPlayerStats(ProgressState progress) {
@@ -370,6 +330,87 @@ class HomeScreen extends ConsumerWidget {
               size: 24,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PulsingHeart extends StatefulWidget {
+  const _PulsingHeart();
+
+  @override
+  State<_PulsingHeart> createState() => _PulsingHeartState();
+}
+
+class _PulsingHeartState extends State<_PulsingHeart>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const filled = Color(0xFFFF4F7B);
+    const empty = Color(0x15FFFFFF);
+    final pattern = [
+      [false, true, false, true, false],
+      [true, true, true, true, true],
+      [true, true, true, true, true],
+      [false, true, true, true, false],
+      [false, false, true, false, false],
+    ];
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final scale = 1.0 + _controller.value * 0.06;
+        final opacity = 0.7 + _controller.value * 0.3;
+        return Transform.scale(
+          scale: scale,
+          child: Opacity(
+            opacity: opacity,
+            child: child,
+          ),
+        );
+      },
+      child: SizedBox(
+        width: 54,
+        height: 54,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: pattern.map((row) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: row.map((isFilled) {
+                return Container(
+                  width: 9,
+                  height: 9,
+                  margin: const EdgeInsets.all(0.5),
+                  decoration: BoxDecoration(
+                    color: isFilled ? filled : empty,
+                    borderRadius: BorderRadius.circular(1.5),
+                    boxShadow: isFilled
+                        ? [BoxShadow(color: filled.withValues(alpha: 0.4), blurRadius: 3)]
+                        : null,
+                  ),
+                );
+              }).toList(),
+            );
+          }).toList(),
         ),
       ),
     );

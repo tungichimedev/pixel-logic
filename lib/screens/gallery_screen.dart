@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/progress_controller.dart';
+import '../models/nonogram_puzzle.dart';
 import '../utils/app_theme.dart';
 import '../utils/puzzle_registry.dart';
 
@@ -10,7 +11,7 @@ class GalleryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(progressProvider);
-    final completedPuzzles = <({String title, String packName, int stars, int gridSize})>[];
+    final completedPuzzles = <({String title, String packName, int stars, int gridSize, NonogramPuzzle puzzle})>[];
 
     for (final pack in PuzzleRegistry.packs) {
       for (final puzzle in pack.puzzles) {
@@ -21,6 +22,7 @@ class GalleryScreen extends ConsumerWidget {
             packName: pack.name,
             stars: result.starsEarned,
             gridSize: puzzle.gridSize,
+            puzzle: puzzle,
           ));
         }
       }
@@ -107,7 +109,7 @@ class GalleryScreen extends ConsumerWidget {
                       itemCount: completedPuzzles.length,
                       itemBuilder: (context, index) {
                         final p = completedPuzzles[index];
-                        return _galleryTile(p.title, p.packName, p.stars, p.gridSize);
+                        return _galleryTile(p.title, p.packName, p.stars, p.gridSize, p.puzzle);
                       },
                     ),
             ),
@@ -127,7 +129,7 @@ class GalleryScreen extends ConsumerWidget {
     );
   }
 
-  Widget _galleryTile(String title, String packName, int stars, int gridSize) {
+  Widget _galleryTile(String title, String packName, int stars, int gridSize, NonogramPuzzle puzzle) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -137,12 +139,12 @@ class GalleryScreen extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.check_circle_rounded, color: AppColors.satisfied, size: 28),
+          // Mini pixel art thumbnail
+          _buildMiniPixelArt(puzzle),
           const SizedBox(height: 4),
-          Text(title, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800)),
-          Text('$packName \u2022 ${gridSize}x$gridSize',
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 8, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 4),
+          Text(title, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800),
+              overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(3, (i) {
@@ -154,6 +156,37 @@ class GalleryScreen extends ConsumerWidget {
             }),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMiniPixelArt(NonogramPuzzle puzzle) {
+    final size = puzzle.gridSize;
+    final cellPx = size <= 5 ? 8.0 : 4.0;
+    return SizedBox(
+      width: cellPx * size + size - 1,
+      height: cellPx * size + size - 1,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(size, (r) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(size, (c) {
+              final isFilled = puzzle.solution[r][c] > 0;
+              return Container(
+                width: cellPx,
+                height: cellPx,
+                margin: const EdgeInsets.all(0.5),
+                decoration: BoxDecoration(
+                  color: isFilled
+                      ? AppColors.cellFilled
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              );
+            }),
+          );
+        }),
       ),
     );
   }
