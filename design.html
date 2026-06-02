@@ -536,7 +536,7 @@ h1 {
   align-items: flex-start;
   margin: 2px auto 0;
   width: fit-content;
-  padding-left: 4px;
+  padding: 0 8px;
 }
 .col-clues-row {
   display: flex;
@@ -558,9 +558,9 @@ h1 {
 .nono-row { display: flex; align-items: center; gap: 1px; }
 
 .row-clue {
-  width: 32px;
+  width: 28px;
   text-align: right;
-  padding-right: 4px;
+  padding-right: 3px;
   color: #9999CC;
   font-size: 10px;
   font-weight: 800;
@@ -589,8 +589,8 @@ h1 {
 
 /* #4: Filled cells — gradient, 4-directional inner shadows + outer glow */
 .gcell {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 2px;
   flex-shrink: 0;
 }
@@ -688,7 +688,7 @@ h1 {
   font-size: 22px;
   letter-spacing: 4px;
   margin-top: 6px;
-  color: #661111;
+  color: #552222;
 }
 .go-divider {
   height: 1px;
@@ -1299,13 +1299,13 @@ h1 {
 .tooltip-text { color: #fff; font-size: 8px; font-weight: 700; line-height: 1.5; }
 .tooltip-arrow {
   position: absolute;
-  right: -1px;
+  left: -6px;
   top: 12px;
   width: 10px;
   height: 10px;
   background: rgba(20,14,55,0.85);
-  border-top: 1px solid rgba(255,216,75,0.45);
-  border-right: 1px solid rgba(255,216,75,0.45);
+  border-bottom: 1px solid rgba(255,216,75,0.45);
+  border-left: 1px solid rgba(255,216,75,0.45);
   transform: rotate(45deg);
 }
 
@@ -1495,7 +1495,268 @@ h1 {
   </style>
 <body>
   <h1>PIXEL LOGIC</h1>
-  <p class="subtitle">v4 — Premium Art Direction · 8 Screens &nbsp;|&nbsp; 8 Screens — All States Covered</p>
+  <p class="subtitle">v5 — Premium Art Direction · 16 Screens &nbsp;|&nbsp; Onboarding + Core Flow + Additional</p>
+
+  <!-- ═══════════════════════════════════════ ROW 0: ONBOARDING ═══════════════ -->
+  <div class="row-section">
+    <div class="row-label">Onboarding (First Launch)</div>
+    <div class="screens-row">
+
+      <!-- ─── ONBOARDING 1: WELCOME ─── -->
+      <div class="screen-wrap">
+        <div class="phone" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div class="status-bar" style="position:absolute;top:0;left:0;right:0;">
+            <span>9:41</span>
+            <span style="letter-spacing:2px;">&#9679;&#9679;&#9679;&#9679; &#9681; &#9646;&#9646;</span>
+          </div>
+
+          <!-- Floating pixel art decorations -->
+          <div style="position:absolute;top:80px;left:30px;opacity:0.15;transform:rotate(-12deg);">
+            <div style="display:grid;grid-template-columns:repeat(5,8px);gap:1px;">
+              <div style="width:8px;height:8px;background:transparent;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:transparent;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:transparent;"></div>
+              <div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div>
+              <div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div>
+              <div style="width:8px;height:8px;background:transparent;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:transparent;"></div>
+              <div style="width:8px;height:8px;background:transparent;"></div><div style="width:8px;height:8px;background:transparent;"></div><div style="width:8px;height:8px;background:#FF4F7B;border-radius:1px;"></div><div style="width:8px;height:8px;background:transparent;"></div><div style="width:8px;height:8px;background:transparent;"></div>
+            </div>
+          </div>
+          <div style="position:absolute;bottom:120px;right:25px;opacity:0.12;transform:rotate(10deg);">
+            <div style="display:grid;grid-template-columns:repeat(5,7px);gap:1px;">
+              <div style="width:7px;height:7px;background:transparent;"></div><div style="width:7px;height:7px;background:transparent;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:transparent;"></div><div style="width:7px;height:7px;background:transparent;"></div>
+              <div style="width:7px;height:7px;background:transparent;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:transparent;"></div>
+              <div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div>
+              <div style="width:7px;height:7px;background:transparent;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:transparent;"></div><div style="width:7px;height:7px;background:#4488FF;border-radius:1px;"></div><div style="width:7px;height:7px;background:transparent;"></div>
+              <div style="width:7px;height:7px;background:#FFD84B;border-radius:1px;"></div><div style="width:7px;height:7px;background:transparent;"></div><div style="width:7px;height:7px;background:#FFD84B;border-radius:1px;"></div><div style="width:7px;height:7px;background:transparent;"></div><div style="width:7px;height:7px;background:#FFD84B;border-radius:1px;"></div>
+            </div>
+          </div>
+
+          <!-- Logo heart grid — large, centered -->
+          <div style="display:grid;grid-template-columns:repeat(5,24px);grid-template-rows:repeat(5,24px);gap:4px;margin-bottom:24px;">
+            <div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div>
+            <div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div>
+            <div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div>
+            <div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div>
+            <div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div><div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div><div style="width:24px;height:24px;background:#FF4F7B;border-radius:4px;box-shadow:0 0 10px rgba(255,79,123,0.6);"></div><div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div><div style="width:24px;height:24px;background:transparent;border-radius:4px;"></div>
+          </div>
+
+          <!-- Title -->
+          <div style="font-family:'Press Start 2P',monospace;font-size:20px;background:linear-gradient(180deg,#FFF5CC,#FFE88A,#FFD84B,#FF9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(255,216,75,0.5));margin-bottom:6px;">PIXEL LOGIC</div>
+          <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:#9999CC;letter-spacing:3px;margin-bottom:32px;">NONOGRAM PUZZLES</div>
+
+          <!-- Tagline -->
+          <div style="color:#fff;font-size:16px;font-weight:900;text-align:center;line-height:1.5;padding:0 24px;">
+            Solve clues. Fill cells.<br>
+            <span style="color:#00E676;filter:drop-shadow(0 0 6px rgba(0,230,118,0.4));">Reveal pixel art.</span>
+          </div>
+
+          <!-- Page dots + button -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:auto;padding-bottom:24px;">
+            <div style="display:flex;gap:6px;">
+              <div style="width:24px;height:8px;background:#FFD84B;border-radius:4px;"></div>
+              <div style="width:8px;height:8px;background:rgba(153,153,204,0.3);border-radius:4px;"></div>
+              <div style="width:8px;height:8px;background:rgba(153,153,204,0.3);border-radius:4px;"></div>
+            </div>
+            <div style="width:200px;height:44px;background:linear-gradient(180deg,#FFE066,#FFD84B,#FF9500);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(255,149,0,0.3);">
+              <span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#1a0a00;letter-spacing:1px;">GET STARTED</span>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Onboarding 1 — Welcome</div>
+      </div>
+
+      <!-- ─── ONBOARDING 2: HOW IT WORKS ─── -->
+      <div class="screen-wrap">
+        <div class="phone" style="display:flex;flex-direction:column;padding:22px 20px 0;">
+          <div class="status-bar" style="position:absolute;top:0;left:0;right:0;">
+            <span>9:41</span>
+            <span style="letter-spacing:2px;">&#9679;&#9679;&#9679;&#9679; &#9681; &#9646;&#9646;</span>
+          </div>
+
+          <div style="height:22px;"></div>
+          <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:#FFD84B;text-align:center;margin:24px 0 8px;">HOW IT WORKS</div>
+
+          <!-- Step 1: Clues -->
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:rgba(68,136,255,0.08);border:1px solid rgba(68,136,255,0.2);border-radius:14px;margin-bottom:10px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(68,136,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <div style="font-family:'Press Start 2P',monospace;font-size:14px;color:#4488FF;">3</div>
+            </div>
+            <div>
+              <div style="color:#fff;font-size:12px;font-weight:900;margin-bottom:2px;">Read the Clues</div>
+              <div style="color:#9999CC;font-size:9px;font-weight:600;line-height:1.4;">Numbers tell you how many cells to fill in each row and column</div>
+            </div>
+          </div>
+
+          <!-- Step 2: Fill -->
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,216,75,0.06);border:1px solid rgba(255,216,75,0.15);border-radius:14px;margin-bottom:10px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,216,75,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <div style="display:grid;grid-template-columns:repeat(3,10px);gap:2px;">
+                <div style="width:10px;height:10px;background:#4488FF;border-radius:2px;box-shadow:0 0 4px rgba(68,136,255,0.4);"></div>
+                <div style="width:10px;height:10px;background:rgba(255,255,255,0.08);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div>
+                <div style="width:10px;height:10px;background:rgba(255,255,255,0.08);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div>
+              </div>
+            </div>
+            <div>
+              <div style="color:#fff;font-size:12px;font-weight:900;margin-bottom:2px;">Fill Cells</div>
+              <div style="color:#9999CC;font-size:9px;font-weight:600;line-height:1.4;">Tap or drag to fill. Mark cells you know are empty</div>
+            </div>
+          </div>
+
+          <!-- Step 3: Reveal -->
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.15);border-radius:14px;margin-bottom:10px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,230,118,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <div style="display:grid;grid-template-columns:repeat(3,10px);gap:2px;">
+                <div style="width:10px;height:10px;background:#FF4F7B;border-radius:2px;"></div>
+                <div style="width:10px;height:10px;background:#4488FF;border-radius:2px;"></div>
+                <div style="width:10px;height:10px;background:#FFD84B;border-radius:2px;"></div>
+                <div style="width:10px;height:10px;background:#00E676;border-radius:2px;"></div>
+                <div style="width:10px;height:10px;background:#9B59FF;border-radius:2px;"></div>
+                <div style="width:10px;height:10px;background:#FF4F7B;border-radius:2px;"></div>
+                <div style="width:10px;height:10px;background:#4488FF;border-radius:2px;"></div>
+                <div style="width:10px;height:10px;background:#FFD84B;border-radius:2px;"></div>
+                <div style="width:10px;height:10px;background:#00E676;border-radius:2px;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="color:#fff;font-size:12px;font-weight:900;margin-bottom:2px;">Reveal Pixel Art</div>
+              <div style="color:#9999CC;font-size:9px;font-weight:600;line-height:1.4;">Complete the puzzle to uncover colorful pixel art pictures</div>
+            </div>
+          </div>
+
+          <!-- Demo animation area — before/after -->
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+            <div style="display:flex;align-items:center;gap:16px;">
+              <!-- Before: empty grid with clue numbers -->
+              <div style="text-align:center;">
+                <div style="font-size:7px;color:#9999CC;font-weight:700;margin-bottom:4px;letter-spacing:1px;">CLUES</div>
+                <!-- Column clues -->
+                <div style="display:flex;margin-left:16px;margin-bottom:1px;">
+                  <div style="width:16px;text-align:center;font-size:7px;font-weight:900;color:#9999CC;">1</div>
+                  <div style="width:16px;text-align:center;font-size:7px;font-weight:900;color:#9999CC;">5</div>
+                  <div style="width:16px;text-align:center;font-size:7px;font-weight:900;color:#9999CC;">3</div>
+                  <div style="width:16px;text-align:center;font-size:7px;font-weight:900;color:#9999CC;">5</div>
+                  <div style="width:16px;text-align:center;font-size:7px;font-weight:900;color:#9999CC;">1</div>
+                </div>
+                <!-- Grid with row clues -->
+                <div style="display:flex;align-items:center;gap:1px;">
+                  <div style="display:flex;flex-direction:column;gap:1px;width:14px;">
+                    <div style="height:16px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:900;color:#9999CC;">2</div>
+                    <div style="height:16px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:900;color:#9999CC;">5</div>
+                    <div style="height:16px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:900;color:#9999CC;">5</div>
+                    <div style="height:16px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:900;color:#9999CC;">3</div>
+                    <div style="height:16px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:900;color:#9999CC;">1</div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(5,16px);grid-template-rows:repeat(5,16px);gap:1px;">
+                    <div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div>
+                    <div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div>
+                    <div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div>
+                    <div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div>
+                    <div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div><div style="width:16px;height:16px;background:rgba(255,255,255,0.06);border-radius:2px;border:1px solid rgba(255,255,255,0.1);"></div>
+                  </div>
+                </div>
+              </div>
+              <!-- Arrow -->
+              <div style="color:#FFD84B;font-size:20px;filter:drop-shadow(0 0 6px rgba(255,216,75,0.4));">&#10132;</div>
+              <!-- After: colored pixel art -->
+              <div style="text-align:center;">
+                <div style="font-size:7px;color:#00E676;font-weight:700;margin-bottom:4px;letter-spacing:1px;">REVEAL!</div>
+                <div style="display:grid;grid-template-columns:repeat(5,16px);grid-template-rows:repeat(5,16px);gap:1px;border-radius:4px;overflow:hidden;box-shadow:0 0 12px rgba(0,230,118,0.15);">
+                  <div style="width:16px;height:16px;background:transparent;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:transparent;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:transparent;"></div>
+                  <div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div>
+                  <div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div>
+                  <div style="width:16px;height:16px;background:transparent;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:transparent;"></div>
+                  <div style="width:16px;height:16px;background:transparent;"></div><div style="width:16px;height:16px;background:transparent;"></div><div style="width:16px;height:16px;background:#FF4F7B;"></div><div style="width:16px;height:16px;background:transparent;"></div><div style="width:16px;height:16px;background:transparent;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Page dots + button -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:auto;padding-bottom:24px;">
+            <div style="display:flex;gap:6px;">
+              <div style="width:8px;height:8px;background:rgba(153,153,204,0.5);border-radius:4px;"></div>
+              <div style="width:24px;height:8px;background:#FFD84B;border-radius:4px;"></div>
+              <div style="width:8px;height:8px;background:rgba(153,153,204,0.3);border-radius:4px;"></div>
+            </div>
+            <div style="width:200px;height:44px;background:linear-gradient(180deg,#FFE066,#FFD84B,#FF9500);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(255,149,0,0.3);">
+              <span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#1a0a00;letter-spacing:1px;">NEXT</span>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Onboarding 2 — How It Works</div>
+      </div>
+
+      <!-- ─── ONBOARDING 3: GET STARTED ─── -->
+      <div class="screen-wrap">
+        <div class="phone" style="display:flex;flex-direction:column;padding:22px 20px 0;">
+          <div class="status-bar" style="position:absolute;top:0;left:0;right:0;">
+            <span>9:41</span>
+            <span style="letter-spacing:2px;">&#9679;&#9679;&#9679;&#9679; &#9681; &#9646;&#9646;</span>
+          </div>
+
+          <div style="height:22px;"></div>
+          <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:#FFD84B;text-align:center;margin:24px 0 20px;">WHAT YOU GET</div>
+
+          <!-- Feature cards -->
+          <div style="display:flex;flex-direction:column;gap:10px;flex:1;">
+            <!-- 30 puzzles -->
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(255,79,123,0.2),rgba(255,79,123,0.08));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">&#127912;</div>
+              <div>
+                <div style="color:#fff;font-size:12px;font-weight:900;">30 Pixel Art Puzzles</div>
+                <div style="color:#9999CC;font-size:9px;font-weight:600;">Animals and Space themed packs</div>
+              </div>
+            </div>
+            <!-- Daily challenge -->
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(255,216,75,0.2),rgba(255,216,75,0.08));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">&#9889;</div>
+              <div>
+                <div style="color:#fff;font-size:12px;font-weight:900;">New Puzzle Every Day</div>
+                <div style="color:#9999CC;font-size:9px;font-weight:600;">Daily challenge with bonus XP</div>
+              </div>
+            </div>
+            <!-- Levels & XP -->
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(0,230,118,0.2),rgba(0,230,118,0.08));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">&#11088;</div>
+              <div>
+                <div style="color:#fff;font-size:12px;font-weight:900;">Earn Stars & Level Up</div>
+                <div style="color:#9999CC;font-size:9px;font-weight:600;">Track your progress and achievements</div>
+              </div>
+            </div>
+            <!-- Gallery -->
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(68,136,255,0.2),rgba(68,136,255,0.08));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">&#128444;</div>
+              <div>
+                <div style="color:#fff;font-size:12px;font-weight:900;">Build Your Collection</div>
+                <div style="color:#9999CC;font-size:9px;font-weight:600;">Gallery of all your solved pixel art</div>
+              </div>
+            </div>
+            <!-- Free -->
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,216,75,0.06);border:1px solid rgba(255,216,75,0.15);border-radius:14px;">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(255,216,75,0.2),rgba(255,216,75,0.08));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:#FFD84B;">&#10003;</div>
+              <div>
+                <div style="color:#FFD84B;font-size:12px;font-weight:900;">100% Free to Play</div>
+                <div style="color:#9999CC;font-size:9px;font-weight:600;">No paywalls. No required purchases</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Page dots + CTA -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:auto;padding-bottom:24px;">
+            <div style="display:flex;gap:6px;">
+              <div style="width:8px;height:8px;background:rgba(153,153,204,0.5);border-radius:4px;"></div>
+              <div style="width:8px;height:8px;background:rgba(153,153,204,0.5);border-radius:4px;"></div>
+              <div style="width:24px;height:8px;background:#FFD84B;border-radius:4px;"></div>
+            </div>
+            <div style="width:200px;height:48px;background:linear-gradient(180deg,#FFE066,#FFD84B,#FF9500);border-radius:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,149,0,0.4),0 0 30px rgba(255,149,0,0.15);">
+              <span style="font-family:'Press Start 2P',monospace;font-size:10px;color:#1a0a00;letter-spacing:1px;">LET'S PLAY!</span>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Onboarding 3 — Get Started</div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════ ROW 1: CORE FLOW ═══════════════ -->
   <div class="row-section">
@@ -1534,8 +1795,8 @@ h1 {
             <div class="daily-banner-arrow">&#8594;</div>
           </div>
 
-          <!-- Pixel diamond separator -->
-          <div style="display:flex;justify-content:center;margin:4px 0;"><div style="width:5px;height:5px;background:#FFD84B;transform:rotate(45deg);opacity:0.4;box-shadow:0 0 6px rgba(255,216,75,0.4);"></div></div>
+          <!-- Gradient line separator -->
+          <div style="height:1px;margin:6px 40px;background:linear-gradient(90deg,transparent,rgba(255,216,75,0.15),transparent);"></div>
 
           <!-- Player stats -->
           <div class="stats-row">
@@ -1554,8 +1815,8 @@ h1 {
           <div class="pack-row">
             <div class="pack-chip active">Animals &#128049;</div>
             <div class="pack-chip">Space &#128640;</div>
-            <div class="pack-chip">Food &#127829;</div>
-            <div class="pack-chip">Holiday &#127876;</div>
+            <div class="pack-chip locked">Food &#128274;</div>
+            <div class="pack-chip locked">Holiday &#128274;</div>
             <div class="pack-chip locked">Fantasy &#128274;</div>
             <div class="pack-chip locked">Arch &#128274;</div>
           </div>
@@ -1571,7 +1832,7 @@ h1 {
             <div class="s1-play-btn">&#9654; &nbsp;PLAY</div>
           </div>
 
-          <!-- Fix 6: SVG bottom nav icons -->
+          <!-- Bottom nav — 3 tabs (MVP) -->
           <div class="bottom-nav">
             <div class="nav-item active">
               <div class="nav-icon">
@@ -1591,14 +1852,6 @@ h1 {
                 </svg>
               </div>
               <span class="nl">GALLERY</span>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <polygon points="9,1 11,7 17,7 12,11 14,17 9,13 4,17 6,11 1,7 7,7"/>
-                </svg>
-              </div>
-              <span class="nl">RANKS</span>
             </div>
             <div class="nav-item">
               <div class="nav-icon">
@@ -1786,6 +2039,7 @@ h1 {
               <div class="go-title">Need More<br>Lives?</div>
               <!-- Fix 9: depleted hearts in dark maroon -->
               <div class="go-hearts">&#9829; &#9829; &#9829;</div>
+              <div style="color:#9999CC;font-size:9px;font-weight:700;margin-top:2px;">0 / 3 lives remaining</div>
               <div class="go-divider"></div>
 
               <div class="go-option gold-btn">
@@ -2045,10 +2299,7 @@ h1 {
           <div class="s5-pack-tabs">
             <div class="s5-tab active">Animals<br>&#128049;</div>
             <div class="s5-tab">Space<br>&#128640;</div>
-            <div class="s5-tab">Food<br>&#127829;</div>
-            <div class="s5-tab">Holiday<br>&#127876;</div>
-            <div class="s5-tab" style="opacity:0.4;">Fantasy<br>&#128274;</div>
-            <div class="s5-tab" style="opacity:0.4;">Arch<br>&#128274;</div>
+            <div class="s5-tab" style="opacity:0.35;font-size:7px;">MORE<br>SOON</div>
           </div>
         </div>
         <div class="screen-label">Screen 5 — Pack Select</div>
@@ -2065,6 +2316,13 @@ h1 {
           <!-- Fix 1: pixel font for GALLERY -->
           <div class="s6-header">
             <div class="s6-title">GALLERY</div>
+          </div>
+
+          <!-- Pack filter chips -->
+          <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;">
+            <div style="padding:3px 10px;background:rgba(255,216,75,0.12);border:1px solid rgba(255,216,75,0.3);border-radius:10px;font-size:8px;font-weight:800;color:#FFD84B;">ALL</div>
+            <div style="padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:8px;font-weight:700;color:#9999CC;">Animals</div>
+            <div style="padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:8px;font-weight:700;color:#9999CC;">Space</div>
           </div>
 
           <!-- Pack progress card -->
@@ -2178,7 +2436,7 @@ h1 {
 
           </div><!-- .gallery-grid -->
 
-          <!-- Fix 6: SVG bottom nav icons -->
+          <!-- Bottom nav — 3 tabs (MVP) -->
           <div class="bottom-nav">
             <div class="nav-item">
               <div class="nav-icon">
@@ -2198,14 +2456,6 @@ h1 {
                 </svg>
               </div>
               <span class="nl">GALLERY</span>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <polygon points="9,1 11,7 17,7 12,11 14,17 9,13 4,17 6,11 1,7 7,7"/>
-                </svg>
-              </div>
-              <span class="nl">RANKS</span>
             </div>
             <div class="nav-item">
               <div class="nav-icon">
@@ -2363,7 +2613,7 @@ h1 {
               <div class="settings-row">
                 <div>
                   <div class="settings-row-label">Error Checking</div>
-                  <div class="settings-row-sub" style="color:rgba(153,153,204,0.5);">Highlights wrong cells</div>
+                  <div class="settings-row-sub" style="color:rgba(153,153,204,0.5);">Disable for the ultimate challenge</div>
                 </div>
                 <div class="settings-row-right">
                   <div class="pro-badge">PRO</div>
@@ -2459,8 +2709,8 @@ h1 {
               <div><div style="color:#fff;font-size:9px;font-weight:800;">5 Hints / Week</div><div style="color:#9999CC;font-size:8px;font-weight:700;">Never get stuck again</div></div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:linear-gradient(135deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.02) 100%);border:1px solid rgba(255,255,255,0.08);border-top:1px solid rgba(255,255,255,0.14);border-radius:10px;">
-              <span style="font-size:16px;">&#9888;&#xFE0E;</span>
-              <div><div style="color:#fff;font-size:9px;font-weight:800;">Purist Mode</div><div style="color:#9999CC;font-size:8px;font-weight:700;">No error checking for experts</div></div>
+              <span style="font-size:16px;">&#128737;&#xFE0E;</span>
+              <div><div style="color:#fff;font-size:9px;font-weight:800;">Purist Mode</div><div style="color:#9999CC;font-size:8px;font-weight:700;">The ultimate challenge — no safety net</div></div>
             </div>
           </div>
 
@@ -2539,7 +2789,6 @@ h1 {
           <div class="bottom-nav" style="position:absolute;bottom:0;left:0;right:0;">
             <div class="nav-item"><div class="nav-icon"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M2 9l7-7 7 7M4 8v7h10V8" fill="none" stroke="#9999CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="font-size:8px;font-weight:700;color:#9999CC;">HOME</span></div>
             <div class="nav-item"><div class="nav-icon"><svg width="18" height="18" viewBox="0 0 18 18"><rect x="2" y="2" width="6" height="6" rx="1" fill="none" stroke="#9999CC" stroke-width="1.5"/><rect x="10" y="2" width="6" height="6" rx="1" fill="none" stroke="#9999CC" stroke-width="1.5"/><rect x="2" y="10" width="6" height="6" rx="1" fill="none" stroke="#9999CC" stroke-width="1.5"/><rect x="10" y="10" width="6" height="6" rx="1" fill="none" stroke="#9999CC" stroke-width="1.5"/></svg></div><span style="font-size:8px;font-weight:700;color:#9999CC;">GALLERY</span></div>
-            <div class="nav-item"><div class="nav-icon"><svg width="18" height="18" viewBox="0 0 18 18"><polygon points="9,1 11.5,6 17,7 13,11 14,16.5 9,14 4,16.5 5,11 1,7 6.5,6" fill="none" stroke="#9999CC" stroke-width="1.5" stroke-linejoin="round"/></svg></div><span style="font-size:8px;font-weight:700;color:#9999CC;">RANKS</span></div>
             <div class="nav-item active"><div class="nav-icon"><svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="3" fill="none" stroke="#FFD84B" stroke-width="1.5"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M4.2 13.8l1.4-1.4M12.4 5.6l1.4-1.4" stroke="#FFD84B" stroke-width="1.5" stroke-linecap="round"/></svg></div><span style="font-size:8px;font-weight:700;color:#FFD84B;">MORE</span></div>
           </div>
         </div>
@@ -2569,7 +2818,7 @@ h1 {
           <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;margin:8px 16px 0;height:80px;">
             <!-- 2nd place -->
             <div style="text-align:center;width:60px;">
-              <div style="font-size:8px;font-weight:800;color:#C0C0C0;">&#9733;</div>
+              <div style="font-size:10px;">&#129352;</div>
               <div style="font-size:8px;font-weight:800;color:#fff;margin-bottom:2px;">Alex</div>
               <div style="height:44px;background:linear-gradient(180deg,rgba(192,192,192,0.2),rgba(192,192,192,0.08));border:1px solid rgba(192,192,192,0.25);border-top:1px solid rgba(192,192,192,0.4);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;flex-direction:column;">
                 <div style="font-size:12px;font-weight:900;color:#C0C0C0;">2</div>
@@ -2587,7 +2836,7 @@ h1 {
             </div>
             <!-- 3rd place -->
             <div style="text-align:center;width:60px;">
-              <div style="font-size:8px;font-weight:800;color:#CD7F32;">&#9733;</div>
+              <div style="font-size:10px;">&#129353;</div>
               <div style="font-size:8px;font-weight:800;color:#fff;margin-bottom:2px;">Maya</div>
               <div style="height:36px;background:linear-gradient(180deg,rgba(205,127,50,0.15),rgba(205,127,50,0.05));border:1px solid rgba(205,127,50,0.25);border-top:1px solid rgba(205,127,50,0.4);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;flex-direction:column;">
                 <div style="font-size:12px;font-weight:900;color:#CD7F32;">3</div>
@@ -2651,20 +2900,41 @@ h1 {
             <div style="color:#9999CC;font-size:8px;font-weight:700;margin-top:2px;">Cost: 1 hint token</div>
           </div>
 
-          <!-- Dimmed grid with highlight cursor -->
-          <div style="display:flex;justify-content:center;margin-top:4px;opacity:0.7;">
-            <div style="display:grid;grid-template-columns:repeat(7,24px);grid-template-rows:repeat(7,24px);gap:1px;position:relative;">
-              <!-- Simplified 7x7 grid section -->
-              <div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div>
-              <div class="gcell filled"></div><div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div><div class="gcell filled"></div>
-              <div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div>
-              <!-- Row with highlighted cell -->
-              <div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div>
-              <div style="width:24px;height:24px;border-radius:3px;background:rgba(255,216,75,0.15);border:2px solid #FFD84B;box-shadow:0 0 12px rgba(255,216,75,0.4),inset 0 0 8px rgba(255,216,75,0.1);animation:pulse-border 1.5s infinite;"></div>
-              <div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div>
-              <div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div>
-              <div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div>
-              <div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div>
+          <!-- Dimmed grid with clues + highlight cursor -->
+          <div style="display:flex;flex-direction:column;align-items:center;margin-top:4px;opacity:0.7;">
+            <!-- Column clues (dimmed) -->
+            <div style="display:flex;margin-left:24px;gap:1px;margin-bottom:2px;">
+              <div style="width:22px;text-align:center;font-size:7px;font-weight:800;color:#00E676;">2</div>
+              <div style="width:22px;text-align:center;font-size:7px;font-weight:800;color:#9999CC;">3</div>
+              <div style="width:22px;text-align:center;font-size:7px;font-weight:800;color:#9999CC;">5</div>
+              <div style="width:22px;text-align:center;font-size:7px;font-weight:800;color:#9999CC;">5</div>
+              <div style="width:22px;text-align:center;font-size:7px;font-weight:800;color:#9999CC;">3</div>
+              <div style="width:22px;text-align:center;font-size:7px;font-weight:800;color:#00E676;">3</div>
+              <div style="width:22px;text-align:center;font-size:7px;font-weight:800;color:#9999CC;">2</div>
+            </div>
+            <div style="display:flex;align-items:start;gap:1px;">
+              <!-- Row clues -->
+              <div style="display:flex;flex-direction:column;gap:1px;width:22px;padding-top:2px;">
+                <div style="height:22px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:800;color:#00E676;">2 2</div>
+                <div style="height:22px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:800;color:#9999CC;">1 3</div>
+                <div style="height:22px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:800;color:#9999CC;">5</div>
+                <div style="height:22px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:800;color:#9999CC;">2 3</div>
+                <div style="height:22px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:800;color:#9999CC;">5</div>
+                <div style="height:22px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:800;color:#9999CC;">0</div>
+                <div style="height:22px;display:flex;align-items:center;justify-content:flex-end;font-size:7px;font-weight:800;color:#9999CC;">0</div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,22px);grid-template-rows:repeat(7,22px);gap:1px;position:relative;">
+                <div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div>
+                <div class="gcell filled"></div><div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div><div class="gcell filled"></div>
+                <div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div>
+                <!-- Row with highlighted cell -->
+                <div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div>
+                <div style="width:22px;height:22px;border-radius:3px;background:rgba(255,216,75,0.15);border:2px solid #FFD84B;box-shadow:0 0 12px rgba(255,216,75,0.4),inset 0 0 8px rgba(255,216,75,0.1);animation:pulse-border 1.5s infinite;"></div>
+                <div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div>
+                <div class="gcell empty"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell filled"></div><div class="gcell empty"></div>
+                <div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div>
+                <div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div><div class="gcell empty"></div>
+              </div>
             </div>
           </div>
 
