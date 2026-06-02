@@ -560,14 +560,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           _buildFeatureCard(
             emoji: '\u{1F5BC}',
             title: 'Build Your Collection',
-            desc: 'Gallery of all your solved pixel art',
+            desc: '30 pixel art pictures to unlock',
             color: AppColors.cellFilled,
           ),
           const SizedBox(height: 10),
           _buildFeatureCard(
-            emoji: '\u2713',
-            title: '100% Free to Play',
-            desc: 'No paywalls. No required purchases',
+            emoji: '\u23F3',
+            title: 'Play at Your Own Pace',
+            desc: 'No timers, no pressure. Just puzzles',
             color: AppColors.primary,
             highlighted: true,
           ),

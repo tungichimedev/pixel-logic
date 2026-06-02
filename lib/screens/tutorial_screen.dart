@@ -38,7 +38,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     ),
     (
       title: 'Check Satisfaction',
-      desc: 'When a row or column is correctly filled, the clue turns green!',
+      desc: 'See? Both the row AND column clue turned green!',
       highlight: 'satisfied',
     ),
     (
@@ -57,24 +57,49 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return true;
   }
 
+  bool _showComplete = false;
+
   void _tapCell(int row, int col) {
-    if (_step < 3) return; // Only allow tapping on solve step
-    HapticFeedback.lightImpact();
-    setState(() {
-      _cells[row][col] = !_cells[row][col];
-      // If wrong cell is filled, flash red and reset
-      if (_cells[row][col] && !_solution[row][col]) {
-        HapticFeedback.heavyImpact();
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted) setState(() => _cells[row][col] = false);
-        });
-        return;
-      }
-      if (_isSolved) {
-        HapticFeedback.heavyImpact();
-        _completeTutorial();
-      }
-    });
+    // Step 1 (fill bottom row) — allow tapping row 2 only
+    if (_step == 1) {
+      if (row != 2) return;
+      HapticFeedback.lightImpact();
+      setState(() {
+        _cells[row][col] = true;
+        // Auto-advance when bottom row complete
+        if (_cells[2][0] && _cells[2][1] && _cells[2][2]) {
+          HapticFeedback.mediumImpact();
+          Future.delayed(const Duration(milliseconds: 400), () {
+            if (mounted) setState(() => _step = 2);
+          });
+        }
+      });
+      return;
+    }
+    // Step 3 (solve) — fill left column to complete L shape
+    if (_step == 3) {
+      HapticFeedback.lightImpact();
+      setState(() {
+        _cells[row][col] = !_cells[row][col];
+        // Wrong cell — flash and reset
+        if (_cells[row][col] && !_solution[row][col]) {
+          HapticFeedback.heavyImpact();
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) setState(() => _cells[row][col] = false);
+          });
+          return;
+        }
+        if (_isSolved) {
+          HapticFeedback.heavyImpact();
+          setState(() => _showComplete = true);
+          Future.delayed(const Duration(milliseconds: 1200), () {
+            _completeTutorial();
+          });
+        }
+      });
+      return;
+    }
+    // Steps 0 and 2 — no tapping allowed (read-only)
   }
 
   Future<void> _completeTutorial() async {
@@ -129,45 +154,55 @@ class _TutorialScreenState extends State<TutorialScreen> {
               // Step-specific visual hint
               _buildStepVisual(),
               const Spacer(),
-              // Progress dots
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(4, (i) {
-                  return Container(
-                    width: i == _step ? 24 : 8,
-                    height: 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    decoration: BoxDecoration(
-                      color: i == _step
-                          ? AppColors.primary
-                          : AppColors.textMuted.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  );
-                }),
+              // Step counter
+              Text(
+                'Step ${_step + 1} of 4',
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 16),
+              // Completion flash
+              if (_showComplete)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.satisfied.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.satisfied.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    'PUZZLE COMPLETE!',
+                    style: AppFonts.pixel(fontSize: 10, color: AppColors.satisfied),
+                  ),
+                ),
+              if (!_showComplete) ...[
               // Buttons
               Row(
                 children: [
-                  // Skip
-                  TextButton(
-                    onPressed: _completeTutorial,
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.textSecondary,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    ),
-                    child: const Text(
-                      'Skip',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                  // Skip — only visible from step 2+
+                  if (_step >= 2)
+                    TextButton(
+                      onPressed: _completeTutorial,
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.textSecondary,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
-                    ),
-                  ),
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox(width: 48),
                   const Spacer(),
-                  // Next
-                  if (_step < 3)
+                  // Next — hidden on step 1 (gated) and step 3 (user completes)
+                  if (_step == 0 || _step == 2)
                     GestureDetector(
                       onTap: () => setState(() => _step++),
                       child: Container(
@@ -203,6 +238,16 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     ),
                 ],
               ),
+              ],
+              // Step 1 gated message
+              if (_step == 1 && !_cells[2][0] && !_cells[2][1] && !_cells[2][2])
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Fill the cells above to continue',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 9, fontWeight: FontWeight.w700),
+                  ),
+                ),
               const SizedBox(height: 32),
             ],
           ),
@@ -221,7 +266,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
       // Step 2: Check satisfaction
       (icon: Icons.check_circle_outline_rounded, text: 'Green clues mean that row or column is correct', color: AppColors.satisfied),
       // Step 3: Solve
-      (icon: Icons.emoji_events_rounded, text: 'Fill the left column to complete the puzzle!', color: AppColors.primary),
+      (icon: Icons.touch_app_rounded, text: 'Fill the left column to complete the puzzle!', color: AppColors.primary),
     ];
     final v = visuals[_step];
     return Container(
