@@ -4,6 +4,7 @@ import '../controllers/progress_controller.dart';
 import '../models/nonogram_puzzle.dart';
 import '../utils/app_theme.dart';
 import '../utils/puzzle_registry.dart';
+import '../widgets/banner_ad_widget.dart';
 
 class GalleryScreen extends ConsumerStatefulWidget {
   const GalleryScreen({super.key});
@@ -94,6 +95,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               ),
             ),
             const SizedBox(height: 12),
+            // Banner ad
+            const BannerAdWidget(),
             // Gallery grid
             Expanded(
               child: filtered.isEmpty

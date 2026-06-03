@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../controllers/achievements_controller.dart';
 import '../controllers/daily_controller.dart';
 import '../controllers/game_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../models/nonogram_state.dart';
 import '../models/puzzle_pack.dart';
+import '../services/ad_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/puzzle_registry.dart';
 import '../widgets/nonogram_grid_widget.dart';
@@ -76,6 +78,14 @@ class _GameScreenState extends ConsumerState<GameScreen>
     });
   }
 
+  Future<void> _maybeShowInterstitial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionCount = prefs.getInt('session_count') ?? 1;
+    await AdService.instance.maybeShowInterstitial(
+      isFirstSession: sessionCount <= 1,
+    );
+  }
+
   String get _timerText {
     final m = (_elapsedSeconds ~/ 60).toString().padLeft(2, '0');
     final s = (_elapsedSeconds % 60).toString().padLeft(2, '0');
@@ -125,6 +135,8 @@ class _GameScreenState extends ConsumerState<GameScreen>
         final progressState = ref.read(progressProvider);
         ref.read(achievementsProvider.notifier).checkAfterPuzzle(progressState, next.mistakes);
         setState(() => _showComplete = true);
+        // Show interstitial ad after completion (every 4th puzzle)
+        _maybeShowInterstitial();
         // Staggered star animation
         for (int i = 0; i < 3; i++) {
           Future.delayed(Duration(milliseconds: 200 + i * 200), () {
@@ -464,13 +476,20 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 style: TextStyle(fontSize: 24, color: Color(0xFF661111)),
               ),
               const SizedBox(height: 16),
-              // Watch ad button (placeholder)
+              // Watch ad button
               GestureDetector(
-                onTap: () {
-                  // Restore lives (simulate ad watched)
-                  controller.restoreLives();
-                  _startTimer();
-                  setState(() => _showZeroLives = false);
+                onTap: () async {
+                  final rewarded = await AdService.instance.showRewardedAd();
+                  if (rewarded && mounted) {
+                    controller.restoreLives();
+                    _startTimer();
+                    setState(() => _showZeroLives = false);
+                  } else if (!rewarded && mounted) {
+                    // Fallback: grant lives anyway if no ad available
+                    controller.restoreLives();
+                    _startTimer();
+                    setState(() => _showZeroLives = false);
+                  }
                 },
                 child: Container(
                   width: double.infinity,

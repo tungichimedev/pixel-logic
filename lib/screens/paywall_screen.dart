@@ -1,19 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import '../controllers/purchase_controller.dart';
+import '../services/purchase_service.dart';
 import '../utils/app_theme.dart';
 
-class PaywallScreen extends StatefulWidget {
+class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
 
   @override
-  State<PaywallScreen> createState() => _PaywallScreenState();
+  ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
 }
 
-class _PaywallScreenState extends State<PaywallScreen> {
+class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   int _selectedPlan = 1; // 0 = monthly, 1 = annual
+  List<Package> _packages = [];
+  bool _purchasing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOfferings();
+  }
+
+  Future<void> _loadOfferings() async {
+    final packages = await PurchaseService.instance.getOfferings();
+    if (mounted) {
+      setState(() {
+        _packages = packages;
+      });
+    }
+  }
+
+  Package? get _monthlyPackage => _packages
+      .where((p) =>
+          p.storeProduct.identifier == PurchaseService.proMonthlyId)
+      .firstOrNull;
+
+  Package? get _annualPackage => _packages
+      .where((p) =>
+          p.storeProduct.identifier == PurchaseService.proAnnualId)
+      .firstOrNull;
+
+  Package? get _selectedPackage =>
+      _selectedPlan == 0 ? _monthlyPackage : _annualPackage;
+
+  Future<void> _handlePurchase() async {
+    final pkg = _selectedPackage;
+    if (pkg == null || _purchasing) return;
+
+    setState(() => _purchasing = true);
+    final success = await PurchaseService.instance.purchase(pkg);
+    if (mounted) {
+      setState(() => _purchasing = false);
+      if (success) {
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Welcome to Pixel Logic Pro!'),
+            backgroundColor: Color(0xFF00C853),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleRestore() async {
+    final restored = await ref.read(purchaseProvider.notifier).restorePurchases();
+    if (mounted) {
+      if (restored) {
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Purchases restored!'),
+            backgroundColor: Color(0xFF00C853),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No previous purchases found.'),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final monthlyPrice = _monthlyPackage?.storeProduct.priceString ?? '\$1.99';
+    final annualPrice = _annualPackage?.storeProduct.priceString ?? '\$9.99';
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: GradientBackground(
@@ -93,23 +171,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       _buildPlanCard(
                         index: 0,
                         title: 'Monthly',
-                        price: '\$1.99/mo',
+                        price: '$monthlyPrice/mo',
                         subtitle: 'Cancel anytime',
                       ),
                       const SizedBox(height: 8),
                       _buildPlanCard(
                         index: 1,
                         title: 'Annual',
-                        price: '\$9.99/yr',
+                        price: '$annualPrice/yr',
                         subtitle: 'Save 58%',
                         badge: 'BEST VALUE',
                       ),
                       const SizedBox(height: 24),
                       // CTA button
                       GestureDetector(
-                        onTap: () {
-                          // TODO: RevenueCat purchase
-                        },
+                        onTap: _purchasing ? null : _handlePurchase,
                         child: Container(
                           width: double.infinity,
                           height: 52,
@@ -130,22 +206,29 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             ],
                           ),
                           alignment: Alignment.center,
-                          child: Text(
-                            'TRY FREE FOR 3 DAYS',
-                            style: AppFonts.pixel(
-                              fontSize: 10,
-                              color: const Color(0xFF1a0a00),
-                              letterSpacing: 1,
-                            ),
-                          ),
+                          child: _purchasing
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Color(0xFF1a0a00),
+                                  ),
+                                )
+                              : Text(
+                                  'TRY FREE FOR 3 DAYS',
+                                  style: AppFonts.pixel(
+                                    fontSize: 10,
+                                    color: const Color(0xFF1a0a00),
+                                    letterSpacing: 1,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 12),
                       // Restore + terms
                       TextButton(
-                        onPressed: () {
-                          // TODO: RevenueCat restore
-                        },
+                        onPressed: _handleRestore,
                         child: const Text(
                           'Restore Purchases',
                           style: TextStyle(

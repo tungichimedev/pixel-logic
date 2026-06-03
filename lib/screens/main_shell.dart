@@ -29,6 +29,9 @@ class _MainShellState extends State<MainShell> {
 
   Future<void> _checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
+    // Track session count for ad frequency
+    final sessions = (prefs.getInt('session_count') ?? 0) + 1;
+    await prefs.setInt('session_count', sessions);
     final onboardingDone = prefs.getBool('onboarding_complete') ?? false;
     final tutorialDone = prefs.getBool('tutorial_complete') ?? false;
     if (mounted) {

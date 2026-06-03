@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/progress_controller.dart';
+import '../controllers/purchase_controller.dart';
+import '../services/consent_service.dart';
 import '../utils/app_theme.dart';
 
 final soundEnabledProvider = NotifierProvider<_BoolNotifier, bool>(_BoolNotifier.new);
@@ -22,6 +25,7 @@ class SettingsScreen extends ConsumerWidget {
     final soundEnabled = ref.watch(soundEnabledProvider);
     final hapticEnabled = ref.watch(hapticEnabledProvider);
     final progress = ref.watch(progressProvider);
+    final purchases = ref.watch(purchaseProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -66,12 +70,26 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   _sectionLabel('GAMEPLAY'),
                   _settingsGroup([
-                    _lockedRow('Purist Mode', 'No error checking', 'PRO'),
+                    _lockedRow('Purist Mode', 'No error checking',
+                        purchases.isPro ? 'ON' : 'PRO'),
+                  ]),
+                  const SizedBox(height: 16),
+                  _sectionLabel('PURCHASES'),
+                  _settingsGroup([
+                    _actionRow('Restore Purchases', Icons.refresh_rounded, () {
+                      _handleRestore(context, ref);
+                    }),
                   ]),
                   const SizedBox(height: 16),
                   _sectionLabel('PRIVACY'),
                   _settingsGroup([
-                    _actionRow('Privacy Policy', Icons.open_in_new_rounded, () {}),
+                    _actionRow('Privacy Policy', Icons.open_in_new_rounded, () {
+                      launchUrl(Uri.parse('https://freelancer-landing-page.web.app/privacy'));
+                    }),
+                    _divider(),
+                    _actionRow('Manage Ad Consent', Icons.privacy_tip_rounded, () {
+                      ConsentService.instance.requestConsent();
+                    }),
                     _divider(),
                     _actionRow('Delete My Data', Icons.delete_forever_rounded, () {
                       _showDeleteDialog(context);
@@ -87,13 +105,17 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   _sectionLabel('ABOUT'),
                   _settingsGroup([
-                    _infoRow('Version', '1.0.0 (prototype)'),
+                    _infoRow('Version', '1.0.0'),
+                    _divider(),
+                    _actionRow('Support', Icons.help_outline_rounded, () {
+                      launchUrl(Uri.parse('https://freelancer-landing-page.web.app/support'));
+                    }),
                     _divider(),
                     _actionRow('Rate App', Icons.star_rounded, () {}),
                   ]),
                   const SizedBox(height: 24),
-                  // Pro banner
-                  _buildProBanner(context),
+                  // Pro banner (only show if not pro)
+                  if (!purchases.isPro) _buildProBanner(context),
                   const SizedBox(height: 32),
                 ],
               ),
@@ -103,6 +125,20 @@ class SettingsScreen extends ConsumerWidget {
       ),
       ),
     );
+  }
+
+  void _handleRestore(BuildContext context, WidgetRef ref) async {
+    final restored = await ref.read(purchaseProvider.notifier).restorePurchases();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(restored
+              ? 'Purchases restored!'
+              : 'No previous purchases found.'),
+          backgroundColor: restored ? const Color(0xFF00C853) : null,
+        ),
+      );
+    }
   }
 
   Widget _sectionLabel(String label) {
@@ -194,6 +230,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _lockedRow(String label, String subtitle, String badge) {
+    final isActive = badge == 'ON';
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
@@ -201,7 +238,10 @@ class SettingsScreen extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 14, fontWeight: FontWeight.w700)),
+              Text(label, style: TextStyle(
+                color: isActive ? Colors.white : AppColors.textMuted,
+                fontSize: 14, fontWeight: FontWeight.w700,
+              )),
               Text(subtitle, style: const TextStyle(color: AppColors.textMuted, fontSize: 10, fontWeight: FontWeight.w600)),
             ],
           ),
@@ -209,7 +249,9 @@ class SettingsScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: AppColors.primaryGradient),
+              gradient: isActive
+                  ? const LinearGradient(colors: [AppColors.satisfied, Color(0xFF00C853)])
+                  : const LinearGradient(colors: AppColors.primaryGradient),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(badge, style: const TextStyle(color: Color(0xFF1a0a00), fontSize: 9, fontWeight: FontWeight.w900)),

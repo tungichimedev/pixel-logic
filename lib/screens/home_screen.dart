@@ -5,6 +5,7 @@ import '../controllers/daily_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../utils/app_theme.dart';
 import '../utils/puzzle_registry.dart';
+import '../widgets/banner_ad_widget.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -44,6 +45,8 @@ class HomeScreen extends ConsumerWidget {
             // Player stats
             _buildPlayerStats(progress),
             const SizedBox(height: 12),
+            // Banner ad
+            const BannerAdWidget(),
             // Pack list
             Expanded(
               child: ListView.builder(
