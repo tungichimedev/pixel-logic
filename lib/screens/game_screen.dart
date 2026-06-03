@@ -135,8 +135,10 @@ class _GameScreenState extends ConsumerState<GameScreen>
         final progressState = ref.read(progressProvider);
         ref.read(achievementsProvider.notifier).checkAfterPuzzle(progressState, next.mistakes);
         setState(() => _showComplete = true);
-        // Show interstitial ad after completion (every 4th puzzle)
-        _maybeShowInterstitial();
+        // Show interstitial ad after a delay (let completion animation play)
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) _maybeShowInterstitial();
+        });
         // Staggered star animation
         for (int i = 0; i < 3; i++) {
           Future.delayed(Duration(milliseconds: 200 + i * 200), () {
@@ -476,19 +478,24 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 style: TextStyle(fontSize: 24, color: Color(0xFF661111)),
               ),
               const SizedBox(height: 16),
-              // Watch ad button
+              // Watch ad button — clearly discloses ad (Q3)
               GestureDetector(
                 onTap: () async {
-                  final rewarded = await AdService.instance.showRewardedAd();
-                  if (rewarded && mounted) {
-                    controller.restoreLives();
-                    _startTimer();
-                    setState(() => _showZeroLives = false);
-                  } else if (!rewarded && mounted) {
-                    // Fallback: grant lives anyway if no ad available
-                    controller.restoreLives();
-                    _startTimer();
-                    setState(() => _showZeroLives = false);
+                  if (AdService.instance.hasRewardedAd) {
+                    final rewarded = await AdService.instance.showRewardedAd();
+                    if (rewarded && mounted) {
+                      controller.restoreLives();
+                      _startTimer();
+                      setState(() => _showZeroLives = false);
+                    }
+                    // If dismissed early (not rewarded), do nothing — user stays on overlay
+                  } else {
+                    // No ad available — grant lives as fallback
+                    if (mounted) {
+                      controller.restoreLives();
+                      _startTimer();
+                      setState(() => _showZeroLives = false);
+                    }
                   }
                 },
                 child: Container(
@@ -506,14 +513,26 @@ class _GameScreenState extends ConsumerState<GameScreen>
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: const Text(
-                    'RESTORE 3 \u2764',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1a0a00),
-                      letterSpacing: 1,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (AdService.instance.hasRewardedAd)
+                        const Icon(Icons.play_circle_rounded,
+                            size: 18, color: Color(0xFF1a0a00)),
+                      if (AdService.instance.hasRewardedAd)
+                        const SizedBox(width: 6),
+                      Text(
+                        AdService.instance.hasRewardedAd
+                            ? 'WATCH AD FOR 3 \u2764'
+                            : 'RESTORE 3 \u2764',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF1a0a00),
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ConsentService {
   static final ConsentService _instance = ConsentService._();
@@ -10,21 +11,34 @@ class ConsentService {
   ConsentService._();
 
   bool _consentGiven = false;
+  bool _consentRequested = false;
   bool get consentGiven => _consentGiven;
+  bool get consentRequested => _consentRequested;
 
-  /// Request consent (GDPR via UMP + ATT on iOS).
-  /// Returns true if user gave consent for personalized ads.
+  /// Load persisted consent state (call at startup, before ads).
+  Future<void> loadPersistedConsent() async {
+    final prefs = await SharedPreferences.getInstance();
+    _consentGiven = prefs.getBool('ad_consent_given') ?? false;
+    _consentRequested = prefs.getBool('consent_requested') ?? false;
+  }
+
+  /// Request consent (ATT + GDPR/UMP). Call AFTER user has seen value
+  /// (post-tutorial or post-first-puzzle, not at cold launch).
+  /// Returns true if personalized ads are allowed.
   Future<bool> requestConsent() async {
-    // 1. iOS ATT dialog (14.5+) — skip on simulator
+    bool attAuthorized = true; // default true for non-iOS
+    bool umpConsented = false;
+
+    // 1. iOS ATT dialog (14.5+)
     if (Platform.isIOS) {
       try {
         final attStatus = await AppTrackingTransparency.requestTrackingAuthorization()
             .timeout(const Duration(seconds: 5), onTimeout: () => TrackingStatus.notDetermined);
-        _consentGiven = attStatus == TrackingStatus.authorized;
+        attAuthorized = attStatus == TrackingStatus.authorized;
         debugPrint('ATT status: $attStatus');
       } catch (e) {
-        debugPrint('ATT not available (simulator?): $e');
-        _consentGiven = false;
+        debugPrint('ATT not available: $e');
+        attAuthorized = false;
       }
     }
 
@@ -33,13 +47,13 @@ class ConsentService {
       final completer = Completer<void>();
       ConsentInformation.instance.requestConsentInfoUpdate(
         ConsentRequestParameters(),
-        () => completer.complete(), // onConsentInfoUpdateSuccess
+        () => completer.complete(),
         (error) {
           debugPrint('Consent info update error: ${error.message}');
           completer.complete();
-        }, // onConsentInfoUpdateFailure
+        },
       );
-      await completer.future;
+      await completer.future.timeout(const Duration(seconds: 8), onTimeout: () {});
 
       if (await ConsentInformation.instance.isConsentFormAvailable()) {
         final formCompleter = Completer<void>();
@@ -49,17 +63,24 @@ class ConsentService {
           }
           formCompleter.complete();
         });
-        await formCompleter.future;
+        await formCompleter.future.timeout(const Duration(seconds: 10), onTimeout: () {});
       }
 
       final status = await ConsentInformation.instance.getConsentStatus();
-      if (status == ConsentStatus.obtained || status == ConsentStatus.notRequired) {
-        _consentGiven = true;
-      }
+      umpConsented = status == ConsentStatus.obtained || status == ConsentStatus.notRequired;
     } catch (e) {
       debugPrint('UMP consent error: $e');
-      _consentGiven = false;
+      umpConsented = false;
     }
+
+    // Consent requires BOTH ATT (iOS) AND UMP to be positive
+    _consentGiven = attAuthorized && umpConsented;
+    _consentRequested = true;
+
+    // Persist
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('ad_consent_given', _consentGiven);
+    await prefs.setBool('consent_requested', true);
 
     return _consentGiven;
   }
@@ -68,5 +89,9 @@ class ConsentService {
   Future<void> resetConsent() async {
     ConsentInformation.instance.reset();
     _consentGiven = false;
+    _consentRequested = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('ad_consent_given', false);
+    await prefs.setBool('consent_requested', false);
   }
 }

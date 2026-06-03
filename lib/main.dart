@@ -11,25 +11,27 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  // Initialize monetization (non-blocking on failure)
-  bool consentGiven = false;
+  // Initialize RevenueCat
   try {
     await PurchaseService.instance.initialize();
   } catch (e) {
     debugPrint('RevenueCat init failed: $e');
   }
 
-  try {
-    consentGiven = await ConsentService.instance.requestConsent()
-        .timeout(const Duration(seconds: 10), onTimeout: () => false);
-  } catch (e) {
-    debugPrint('Consent flow failed: $e');
-  }
+  // Load persisted consent (no dialogs — just read previous state)
+  await ConsentService.instance.loadPersistedConsent();
 
-  try {
-    await AdService.instance.initialize(consentGiven: consentGiven);
-  } catch (e) {
-    debugPrint('Ad init failed: $e');
+  // Only initialize ads if consent was previously obtained.
+  // First-time users get ads initialized after tutorial completes
+  // (triggered from main_shell.dart).
+  if (ConsentService.instance.consentRequested) {
+    try {
+      await AdService.instance.initialize(
+        consentGiven: ConsentService.instance.consentGiven,
+      );
+    } catch (e) {
+      debugPrint('Ad init failed: $e');
+    }
   }
 
   runApp(const ProviderScope(child: PixelLogicApp()));

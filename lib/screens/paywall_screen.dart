@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/purchase_controller.dart';
+import '../services/ad_service.dart';
 import '../services/purchase_service.dart';
 import '../utils/app_theme.dart';
 
@@ -46,22 +48,56 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   Package? get _selectedPackage =>
       _selectedPlan == 0 ? _monthlyPackage : _annualPackage;
 
+  String get _ctaText {
+    final pkg = _selectedPackage;
+    if (pkg == null) return 'START PRO';
+    final intro = pkg.storeProduct.introductoryPrice;
+    if (intro != null && intro.price == 0) {
+      final periods = intro.periodNumberOfUnits;
+      final unit = intro.periodUnit.name.toLowerCase();
+      return 'TRY FREE FOR $periods ${unit}S';
+    }
+    return 'START PRO';
+  }
+
+  String get _disclosureText {
+    final pkg = _selectedPackage;
+    if (pkg == null) return '';
+    final price = pkg.storeProduct.priceString;
+    final period = _selectedPlan == 0 ? 'month' : 'year';
+    return 'Payment of $price/$period will be charged to your Apple ID '
+        'or Google account at confirmation. Subscription automatically '
+        'renews unless cancelled at least 24 hours before the end of '
+        'the current period. Manage subscriptions in your device Settings.';
+  }
+
   Future<void> _handlePurchase() async {
     final pkg = _selectedPackage;
     if (pkg == null || _purchasing) return;
 
     setState(() => _purchasing = true);
-    final success = await PurchaseService.instance.purchase(pkg);
+    AdService.instance.setPurchaseInProgress(true);
+    final result = await PurchaseService.instance.purchase(pkg);
+    AdService.instance.setPurchaseInProgress(false);
     if (mounted) {
       setState(() => _purchasing = false);
-      if (success) {
-        context.pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Welcome to Pixel Logic Pro!'),
-            backgroundColor: Color(0xFF00C853),
-          ),
-        );
+      switch (result) {
+        case PurchaseResult.success:
+          context.pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Welcome to Pixel Logic Pro!'),
+              backgroundColor: Color(0xFF00C853),
+            ),
+          );
+        case PurchaseResult.cancelled:
+          break; // User cancelled — no action needed
+        case PurchaseResult.error:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Purchase failed. Please try again.'),
+            ),
+          );
       }
     }
   }
@@ -216,7 +252,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                   ),
                                 )
                               : Text(
-                                  'TRY FREE FOR 3 DAYS',
+                                  _packages.isEmpty ? 'LOADING...' : _ctaText,
                                   style: AppFonts.pixel(
                                     fontSize: 10,
                                     color: const Color(0xFF1a0a00),
@@ -226,7 +262,23 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Restore + terms
+                      // Auto-renewal disclosure (Apple 3.1.2 requirement)
+                      if (_packages.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            _disclosureText,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w600,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      // Restore purchases
                       TextButton(
                         onPressed: _handleRestore,
                         child: const Text(
@@ -239,13 +291,42 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Cancel anytime. No commitment required.',
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      // Terms of Use + Privacy Policy links (Apple 3.1.2 requirement)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () => launchUrl(Uri.parse(
+                                'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')),
+                            child: const Text(
+                              'Terms of Use',
+                              style: TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                                decorationColor: AppColors.textMuted,
+                              ),
+                            ),
+                          ),
+                          const Text(' · ',
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 9)),
+                          GestureDetector(
+                            onTap: () => launchUrl(Uri.parse(
+                                'https://freelancer-landing-page.web.app/privacy')),
+                            child: const Text(
+                              'Privacy Policy',
+                              style: TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                                decorationColor: AppColors.textMuted,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 24),
                     ],

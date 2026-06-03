@@ -75,22 +75,26 @@ class PurchaseService {
     }
   }
 
-  /// Purchase a package. Returns true on success.
-  Future<bool> purchase(Package package) async {
+  /// Purchase a package. Returns a result enum.
+  Future<PurchaseResult> purchase(Package package) async {
     try {
       final result = await Purchases.purchasePackage(package);
       _updateEntitlements(result);
-      return true;
-    } catch (e) {
-      if (e is PurchasesErrorCode) {
-        debugPrint('Purchase error: $e');
+      return PurchaseResult.success;
+    } on PurchasesError catch (e) {
+      if (e.code == PurchasesErrorCode.purchaseCancelledError) {
+        return PurchaseResult.cancelled;
       }
-      return false;
+      debugPrint('Purchase error: ${e.code} ${e.message}');
+      return PurchaseResult.error;
+    } catch (e) {
+      debugPrint('Purchase unexpected error: $e');
+      return PurchaseResult.error;
     }
   }
 
   /// Purchase by product ID (for hint packs and non-sub products)
-  Future<bool> purchaseProduct(String productId) async {
+  Future<PurchaseResult> purchaseProduct(String productId) async {
     try {
       final offerings = await Purchases.getOfferings();
       final packages = offerings.current?.availablePackages ?? [];
@@ -103,12 +107,12 @@ class PurchaseService {
       if (product.isNotEmpty) {
         final result = await Purchases.purchaseStoreProduct(product.first);
         _updateEntitlements(result);
-        return true;
+        return PurchaseResult.success;
       }
-      return false;
+      return PurchaseResult.error;
     } catch (e) {
       debugPrint('Purchase product error: $e');
-      return false;
+      return PurchaseResult.error;
     }
   }
 
@@ -128,3 +132,5 @@ class PurchaseService {
     _stateController.close();
   }
 }
+
+enum PurchaseResult { success, cancelled, error }

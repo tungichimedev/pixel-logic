@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/ad_service.dart';
+import '../services/consent_service.dart';
 import '../utils/app_theme.dart';
 import 'home_screen.dart';
 import 'gallery_screen.dart';
@@ -43,6 +45,14 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  Future<void> _requestConsentAndInitAds() async {
+    if (ConsentService.instance.consentRequested) return; // already done
+    final consentGiven = await ConsentService.instance.requestConsent();
+    if (!AdService.instance.isInitialized) {
+      await AdService.instance.initialize(consentGiven: consentGiven);
+    }
+  }
+
   final _screens = const [
     HomeScreen(),
     GalleryScreen(),
@@ -71,7 +81,11 @@ class _MainShellState extends State<MainShell> {
 
     if (_showTutorial) {
       return TutorialScreen(
-        onComplete: () => setState(() => _showTutorial = false),
+        onComplete: () {
+          setState(() => _showTutorial = false);
+          // Request consent AFTER tutorial — user has seen value first
+          _requestConsentAndInitAds();
+        },
       );
     }
 

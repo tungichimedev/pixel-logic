@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../controllers/progress_controller.dart';
 import '../controllers/purchase_controller.dart';
+import '../services/ad_service.dart';
 import '../services/consent_service.dart';
 import '../utils/app_theme.dart';
 
@@ -84,11 +87,20 @@ class SettingsScreen extends ConsumerWidget {
                   _sectionLabel('PRIVACY'),
                   _settingsGroup([
                     _actionRow('Privacy Policy', Icons.open_in_new_rounded, () {
-                      launchUrl(Uri.parse('https://freelancer-landing-page.web.app/privacy'));
+                      launchUrl(
+                        Uri.parse('https://freelancer-landing-page.web.app/privacy'),
+                        mode: LaunchMode.externalApplication,
+                      );
                     }),
                     _divider(),
-                    _actionRow('Manage Ad Consent', Icons.privacy_tip_rounded, () {
-                      ConsentService.instance.requestConsent();
+                    _actionRow('Manage Ad Consent', Icons.privacy_tip_rounded, () async {
+                      final consent = await ConsentService.instance.requestConsent();
+                      if (AdService.instance.isInitialized) {
+                        // Re-init not possible, but consent state is persisted
+                        // and will take effect on next app launch
+                      } else {
+                        await AdService.instance.initialize(consentGiven: consent);
+                      }
                     }),
                     _divider(),
                     _actionRow('Delete My Data', Icons.delete_forever_rounded, () {
@@ -108,7 +120,10 @@ class SettingsScreen extends ConsumerWidget {
                     _infoRow('Version', '1.0.0'),
                     _divider(),
                     _actionRow('Support', Icons.help_outline_rounded, () {
-                      launchUrl(Uri.parse('https://freelancer-landing-page.web.app/support'));
+                      launchUrl(
+                        Uri.parse('https://freelancer-landing-page.web.app/support'),
+                        mode: LaunchMode.externalApplication,
+                      );
                     }),
                     _divider(),
                     _actionRow('Rate App', Icons.star_rounded, () {}),
@@ -322,9 +337,25 @@ class SettingsScreen extends ConsumerWidget {
             child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              // TODO: implement full data wipe
+              // Wipe all local data
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              // Anonymize RevenueCat user
+              try {
+                await Purchases.logOut();
+              } catch (_) {}
+              // Reset consent
+              await ConsentService.instance.resetConsent();
+              if (ctx.mounted) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  const SnackBar(
+                    content: Text('All data deleted. Please restart the app.'),
+                    backgroundColor: Color(0xFFFF3B30),
+                  ),
+                );
+              }
             },
             child: const Text('Delete', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w800)),
           ),

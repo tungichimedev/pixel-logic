@@ -11,24 +11,23 @@ class AdService {
   int _puzzlesSinceLastInterstitial = 0;
   int _rewardedAdsThisSession = 0;
   DateTime? _lastInterstitialTime;
+  bool _purchaseInProgress = false;
 
   InterstitialAd? _interstitialAd;
   RewardedAd? _rewardedAd;
-  BannerAd? _bannerAd;
 
   bool _consentGiven = false;
   bool get isInitialized => _initialized;
 
-  // Test ad unit IDs (debug) vs production IDs (release)
-  static String get _bannerAdUnitId => kDebugMode
-      ? 'ca-app-pub-3940256099942544/6300978111' // test
-      : 'ca-app-pub-XXXXX/XXXXX'; // TODO: replace with production ID
   static String get _interstitialAdUnitId => kDebugMode
-      ? 'ca-app-pub-3940256099942544/1033173712' // test
+      ? 'ca-app-pub-3940256099942544/1033173712'
       : 'ca-app-pub-XXXXX/XXXXX'; // TODO: replace with production ID
   static String get _rewardedAdUnitId => kDebugMode
-      ? 'ca-app-pub-3940256099942544/5224354917' // test
+      ? 'ca-app-pub-3940256099942544/5224354917'
       : 'ca-app-pub-XXXXX/XXXXX'; // TODO: replace with production ID
+
+  /// Flag to prevent interstitial during purchase flows (Q2)
+  void setPurchaseInProgress(bool value) => _purchaseInProgress = value;
 
   Future<void> initialize({required bool consentGiven}) async {
     if (_initialized) return;
@@ -37,7 +36,6 @@ class AdService {
     await MobileAds.instance.initialize();
 
     if (!consentGiven) {
-      // Non-personalized ads
       await MobileAds.instance.updateRequestConfiguration(
         RequestConfiguration(
           tagForChildDirectedTreatment: TagForChildDirectedTreatment.unspecified,
@@ -48,32 +46,6 @@ class AdService {
     _initialized = true;
     _preloadInterstitial();
     _preloadRewarded();
-  }
-
-  // --- Banner ---
-
-  BannerAd? createBannerAd({required AdSize size}) {
-    if (!_initialized || PurchaseService.instance.isAdFree) return null;
-
-    _bannerAd?.dispose();
-    _bannerAd = BannerAd(
-      adUnitId: _bannerAdUnitId,
-      size: size,
-      request: _adRequest,
-      listener: BannerAdListener(
-        onAdFailedToLoad: (ad, error) {
-          debugPrint('Banner failed: ${error.message}');
-          ad.dispose();
-          _bannerAd = null;
-        },
-      ),
-    )..load();
-    return _bannerAd;
-  }
-
-  void disposeBanner() {
-    _bannerAd?.dispose();
-    _bannerAd = null;
   }
 
   // --- Interstitial ---
@@ -96,8 +68,12 @@ class AdService {
 
   /// Call after puzzle completion. Shows interstitial every 4th puzzle,
   /// with 3-minute minimum gap. Skips on first session.
+  /// Will not show if a purchase is in progress (Q2).
   Future<bool> maybeShowInterstitial({required bool isFirstSession}) async {
-    if (!_initialized || PurchaseService.instance.isAdFree || isFirstSession) {
+    if (!_initialized ||
+        PurchaseService.instance.isAdFree ||
+        isFirstSession ||
+        _purchaseInProgress) {
       return false;
     }
 
@@ -193,7 +169,6 @@ class AdService {
   );
 
   void dispose() {
-    _bannerAd?.dispose();
     _interstitialAd?.dispose();
     _rewardedAd?.dispose();
   }
