@@ -1,6 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../controllers/achievements_controller.dart';
+import '../controllers/progress_controller.dart';
 import '../services/ad_service.dart';
 import '../services/consent_service.dart';
 import '../utils/app_theme.dart';
@@ -10,14 +13,14 @@ import 'onboarding_screen.dart';
 import 'settings_screen.dart';
 import 'tutorial_screen.dart';
 
-class MainShell extends StatefulWidget {
+class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends ConsumerState<MainShell> {
   int _currentIndex = 0;
   bool _showOnboarding = false;
   bool _showTutorial = false;
@@ -36,6 +39,16 @@ class _MainShellState extends State<MainShell> {
     await prefs.setInt('session_count', sessions);
     final onboardingDone = prefs.getBool('onboarding_complete') ?? false;
     final tutorialDone = prefs.getBool('tutorial_complete') ?? false;
+
+    // Trigger login streak check and life regen on app open
+    if (onboardingDone) {
+      ref.read(progressProvider.notifier).checkLoginStreak();
+      ref.read(progressProvider.notifier).regenLives();
+      // Check streak achievement
+      final streakDay = ref.read(progressProvider).streakDay;
+      ref.read(achievementsProvider.notifier).checkStreak(streakDay);
+    }
+
     if (mounted) {
       setState(() {
         _showOnboarding = !onboardingDone;
@@ -83,8 +96,11 @@ class _MainShellState extends State<MainShell> {
       return TutorialScreen(
         onComplete: () {
           setState(() => _showTutorial = false);
-          // Request consent AFTER tutorial — user has seen value first
+          // Request consent AFTER tutorial -- user has seen value first
           _requestConsentAndInitAds();
+          // Now trigger login streak for first time
+          ref.read(progressProvider.notifier).checkLoginStreak();
+          ref.read(progressProvider.notifier).regenLives();
         },
       );
     }

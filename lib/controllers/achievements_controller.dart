@@ -9,6 +9,7 @@ class Achievement {
   final String description;
   final String icon;
   final int target;
+  final int sparkReward;
 
   const Achievement({
     required this.id,
@@ -16,6 +17,7 @@ class Achievement {
     required this.description,
     required this.icon,
     required this.target,
+    this.sparkReward = 15,
   });
 }
 
@@ -43,6 +45,7 @@ class AchievementsController extends Notifier<AchievementState> {
       description: 'Complete your first puzzle',
       icon: '\u{2705}',
       target: 1,
+      sparkReward: 15,
     ),
     Achievement(
       id: 'ten_puzzles',
@@ -50,6 +53,7 @@ class AchievementsController extends Notifier<AchievementState> {
       description: 'Complete 10 puzzles',
       icon: '\u{1F3C6}',
       target: 10,
+      sparkReward: 30,
     ),
     Achievement(
       id: 'perfect_solve',
@@ -57,6 +61,23 @@ class AchievementsController extends Notifier<AchievementState> {
       description: 'Complete a puzzle with zero errors',
       icon: '\u{2B50}',
       target: 1,
+      sparkReward: 15,
+    ),
+    Achievement(
+      id: 'streak_master',
+      title: 'Streak Master',
+      description: '7-day daily streak',
+      icon: '\u{1F525}',
+      target: 7,
+      sparkReward: 50,
+    ),
+    Achievement(
+      id: 'collector',
+      title: 'Collector',
+      description: 'Complete all puzzles in 1 pack',
+      icon: '\u{1F3A8}',
+      target: 1,
+      sparkReward: 50,
     ),
   ];
 
@@ -86,20 +107,20 @@ class AchievementsController extends Notifier<AchievementState> {
   Future<void> checkAfterPuzzle(ProgressState progressState, int mistakes) async {
     final newProgress = Map<String, int>.from(state.progress);
     final newUnlocked = Set<String>.from(state.unlocked);
-    String? justUnlocked;
+    final justUnlockedList = <String>[];
 
     // First solve
     newProgress['first_solve'] = progressState.results.length;
     if (progressState.results.isNotEmpty && !newUnlocked.contains('first_solve')) {
       newUnlocked.add('first_solve');
-      justUnlocked = 'first_solve';
+      justUnlockedList.add('first_solve');
     }
 
     // Ten puzzles
     newProgress['ten_puzzles'] = progressState.results.length;
     if (progressState.results.length >= 10 && !newUnlocked.contains('ten_puzzles')) {
       newUnlocked.add('ten_puzzles');
-      justUnlocked = 'ten_puzzles';
+      justUnlockedList.add('ten_puzzles');
     }
 
     // Perfect solve
@@ -107,16 +128,64 @@ class AchievementsController extends Notifier<AchievementState> {
       newProgress['perfect_solve'] = 1;
       if (!newUnlocked.contains('perfect_solve')) {
         newUnlocked.add('perfect_solve');
-        justUnlocked = 'perfect_solve';
+        justUnlockedList.add('perfect_solve');
       }
     }
 
     state = state.copyWith(progress: newProgress, unlocked: newUnlocked);
     await _saveToDisk();
 
-    // Show popup if just unlocked
-    if (justUnlocked != null) {
-      _lastUnlocked = justUnlocked;
+    // Award sparks for each newly unlocked achievement
+    for (final id in justUnlockedList) {
+      final achievement = achievements.firstWhere((a) => a.id == id);
+      ref.read(progressProvider.notifier).addSparks(achievement.sparkReward);
+    }
+
+    // Show popup for the first newly unlocked achievement
+    if (justUnlockedList.isNotEmpty) {
+      _lastUnlocked = justUnlockedList.first;
+    }
+  }
+
+  /// Check streak achievement. Called from login streak logic.
+  Future<void> checkStreak(int streakDay) async {
+    final newProgress = Map<String, int>.from(state.progress);
+    final newUnlocked = Set<String>.from(state.unlocked);
+
+    newProgress['streak_master'] = streakDay;
+    if (streakDay >= 7 && !newUnlocked.contains('streak_master')) {
+      newUnlocked.add('streak_master');
+      state = state.copyWith(progress: newProgress, unlocked: newUnlocked);
+      await _saveToDisk();
+      ref.read(progressProvider.notifier).addSparks(
+        achievements.firstWhere((a) => a.id == 'streak_master').sparkReward,
+      );
+      _lastUnlocked = 'streak_master';
+    } else {
+      state = state.copyWith(progress: newProgress);
+      await _saveToDisk();
+    }
+  }
+
+  /// Check collector achievement (all puzzles in a pack completed).
+  Future<void> checkPackComplete(String packId, int completed, int total) async {
+    if (completed < total) return;
+
+    final newProgress = Map<String, int>.from(state.progress);
+    final newUnlocked = Set<String>.from(state.unlocked);
+
+    newProgress['collector'] = 1;
+    if (!newUnlocked.contains('collector')) {
+      newUnlocked.add('collector');
+      state = state.copyWith(progress: newProgress, unlocked: newUnlocked);
+      await _saveToDisk();
+      ref.read(progressProvider.notifier).addSparks(
+        achievements.firstWhere((a) => a.id == 'collector').sparkReward,
+      );
+      _lastUnlocked = 'collector';
+    } else {
+      state = state.copyWith(progress: newProgress);
+      await _saveToDisk();
     }
   }
 

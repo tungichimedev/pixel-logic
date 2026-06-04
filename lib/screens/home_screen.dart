@@ -39,6 +39,9 @@ class HomeScreen extends ConsumerWidget {
             // Mini heart decoration with pulse
             const _PulsingHeart(),
             const SizedBox(height: 12),
+            // Login streak indicator
+            if (progress.streakDay > 0) _buildStreakIndicator(progress),
+            if (progress.streakDay > 0) const SizedBox(height: 8),
             // Daily puzzle banner
             _buildDailyBanner(context, ref),
             const SizedBox(height: 12),
@@ -77,6 +80,89 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _buildStreakIndicator(ProgressState progress) {
+    final reward = SparkRewards.streakReward(progress.streakDay);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFFF9500).withValues(alpha: 0.08),
+            const Color(0xFFFFD84B).withValues(alpha: 0.03),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFFFD84B).withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          const Text('\u{1F525}', style: TextStyle(fontSize: 16)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Row(
+              children: [
+                Text(
+                  '${progress.streakDay}-DAY STREAK',
+                  style: const TextStyle(
+                    color: Color(0xFFFFD84B),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '+$reward\u26A1 today',
+                  style: TextStyle(
+                    color: const Color(0xFFFFD84B).withValues(alpha: 0.7),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (progress.streakFreezeAvailable)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4FC3F7).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                '\u{2744}\uFE0F FREEZE',
+                style: TextStyle(
+                  color: Color(0xFF4FC3F7),
+                  fontSize: 7,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          // Day dots
+          const SizedBox(width: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(7, (i) {
+              final filled = i < (progress.streakDay % 7 == 0 ? 7 : progress.streakDay % 7);
+              return Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.only(left: 2),
+                decoration: BoxDecoration(
+                  color: filled
+                      ? const Color(0xFFFFD84B)
+                      : const Color(0xFFFFD84B).withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }
@@ -128,14 +214,36 @@ class HomeScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'DAILY CHALLENGE',
-                    style: TextStyle(
-                      color: daily.completed ? AppColors.satisfied : AppColors.primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'DAILY CHALLENGE',
+                        style: TextStyle(
+                          color: daily.completed ? AppColors.satisfied : AppColors.primary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      if (!daily.completed) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD84B).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            '+50\u26A1',
+                            style: TextStyle(
+                              color: Color(0xFFFFD84B),
+                              fontSize: 8,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   Text(
                     daily.completed
@@ -237,6 +345,32 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 12),
+          // Sparks balance
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD84B).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFFFFD84B).withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('\u26A1', style: TextStyle(fontSize: 10)),
+                const SizedBox(width: 2),
+                Text(
+                  '${progress.sparks}',
+                  style: const TextStyle(
+                    color: Color(0xFFFFD84B),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
           // Total puzzles
           Text(
             '${progress.results.length} solved',

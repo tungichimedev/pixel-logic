@@ -32,6 +32,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
   Timer? _timer;
   bool _showComplete = false;
   bool _showZeroLives = false;
+  bool _hintProcessing = false;
   late final List<AnimationController> _starControllers;
   late final List<Animation<double>> _starAnimations;
 
@@ -96,10 +97,34 @@ class _GameScreenState extends ConsumerState<GameScreen>
     return _totalSatisfied(state) / (state.puzzle.gridSize * 2);
   }
 
+  void _checkPackCompletion(NonogramState gameState) {
+    final packId = gameState.puzzle.packId;
+    if (packId == 'daily') return;
+
+    final pack = PuzzleRegistry.findPackById(packId);
+    if (pack == null) return;
+
+    final progress = ref.read(progressProvider);
+    final completed = pack.puzzles.where(
+      (p) => progress.results.containsKey(p.id),
+    ).length;
+
+    // Check collector achievement
+    ref.read(achievementsProvider.notifier).checkPackComplete(
+      packId, completed, pack.puzzles.length,
+    );
+
+    // Claim pack completion sparks reward
+    if (completed >= pack.puzzles.length) {
+      ref.read(progressProvider.notifier).claimPackReward(packId);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
+    final progress = ref.watch(progressProvider);
 
     // Detect zero lives (skip if already showing completion)
     ref.listen(gameControllerProvider, (prev, next) {
@@ -134,6 +159,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
         // Check achievements
         final progressState = ref.read(progressProvider);
         ref.read(achievementsProvider.notifier).checkAfterPuzzle(progressState, next.mistakes);
+        // Check pack completion
+        _checkPackCompletion(next);
+
         setState(() => _showComplete = true);
         // Show interstitial ad after a delay (let completion animation play)
         Future.delayed(const Duration(milliseconds: 1500), () {
@@ -170,7 +198,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 // Top bar
                 _buildTopBar(state),
                 // HUD
-                _buildHUD(state, controller),
+                _buildHUD(state, controller, progress),
                 const SizedBox(height: 8),
                 // Grid
                 Expanded(
@@ -187,10 +215,20 @@ class _GameScreenState extends ConsumerState<GameScreen>
                           });
                         },
                         onHintTap: (row, col) {
+                          if (_hintProcessing) return; // non-reentrant
+                          final sparks = ref.read(progressProvider).sparks;
+                          if (sparks < SparkRewards.cellHintCost) {
+                            _showInsufficientSparksSnack();
+                            controller.exitHintMode();
+                            return;
+                          }
+                          _hintProcessing = true;
                           final used = controller.useHintOnCell(row, col);
                           if (used) {
+                            ref.read(progressProvider.notifier).spendSparks(SparkRewards.cellHintCost);
                             HapticFeedback.mediumImpact();
                           }
+                          _hintProcessing = false;
                         },
                       ),
                     ),
@@ -208,6 +246,41 @@ class _GameScreenState extends ConsumerState<GameScreen>
           ],
         ),
       ),
+      ),
+    );
+  }
+
+  void _showInsufficientSparksSnack() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2a1a1a),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFFF4F7B).withValues(alpha: 0.3)),
+          ),
+          child: const Row(
+            children: [
+              Text('\u26A1', style: TextStyle(fontSize: 16)),
+              SizedBox(width: 8),
+              Text(
+                'Not enough Sparks for a hint',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -277,7 +350,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
     );
   }
 
-  Widget _buildHUD(NonogramState state, GameController controller) {
+  Widget _buildHUD(NonogramState state, GameController controller, ProgressState progress) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
@@ -308,6 +381,32 @@ class _GameScreenState extends ConsumerState<GameScreen>
             ),
           ),
           const Spacer(),
+          // Sparks balance
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD84B).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFFFFD84B).withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('\u26A1', style: TextStyle(fontSize: 10)),
+                const SizedBox(width: 2),
+                Text(
+                  '${progress.sparks}',
+                  style: const TextStyle(
+                    color: Color(0xFFFFD84B),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
           // Satisfied constraints
           Text(
             '${_totalSatisfied(state)}/${state.puzzle.gridSize * 2}',
@@ -340,13 +439,31 @@ class _GameScreenState extends ConsumerState<GameScreen>
                       : Colors.white.withValues(alpha: 0.1),
                 ),
               ),
-              child: Text(
-                state.isHintMode ? 'TAP CELL' : '\u{1F4A1} HINT',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  color: state.isHintMode ? AppColors.primary : AppColors.textSecondary,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    state.isHintMode ? 'TAP CELL' : '\u{1F4A1} HINT',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: state.isHintMode ? AppColors.primary : AppColors.textSecondary,
+                    ),
+                  ),
+                  if (!state.isHintMode) ...[
+                    const SizedBox(width: 4),
+                    Text(
+                      '${SparkRewards.cellHintCost}\u26A1',
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w700,
+                        color: progress.sparks >= SparkRewards.cellHintCost
+                            ? const Color(0xFFFFD84B)
+                            : const Color(0xFFFF4F7B),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
@@ -428,6 +545,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
   }
 
   Widget _buildZeroLivesOverlay(GameController controller) {
+    final progress = ref.watch(progressProvider);
+    final canBuyLife = progress.sparks >= SparkRewards.extraLifeCost;
+
     return ClipRect(
       child: BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
@@ -476,7 +596,58 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 style: TextStyle(fontSize: 24, color: Color(0xFF661111)),
               ),
               const SizedBox(height: 16),
-              // Watch ad button — clearly discloses ad (Q3)
+              // Buy life with sparks button
+              GestureDetector(
+                onTap: canBuyLife
+                    ? () {
+                        final bought = ref.read(progressProvider.notifier).buyLife();
+                        if (bought && mounted) {
+                          controller.restoreLives();
+                          _startTimer();
+                          setState(() => _showZeroLives = false);
+                        }
+                      }
+                    : null,
+                child: Container(
+                  width: double.infinity,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: canBuyLife
+                        ? const LinearGradient(colors: [Color(0xFFFFE066), Color(0xFFFFD84B)])
+                        : null,
+                    color: canBuyLife ? null : Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(22),
+                    border: canBuyLife
+                        ? null
+                        : Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '\u26A1',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: canBuyLife ? const Color(0xFF1a0a00) : AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'BUY LIFE (${SparkRewards.extraLifeCost}\u26A1)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: canBuyLife ? const Color(0xFF1a0a00) : AppColors.textMuted,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Watch ad button
               GestureDetector(
                 onTap: () async {
                   if (AdService.instance.hasRewardedAd) {
@@ -486,9 +657,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
                       _startTimer();
                       setState(() => _showZeroLives = false);
                     }
-                    // If dismissed early (not rewarded), do nothing — user stays on overlay
+                    // If dismissed early (not rewarded), do nothing
                   } else {
-                    // No ad available — grant lives as fallback
+                    // No ad available -- grant lives as fallback
                     if (mounted) {
                       controller.restoreLives();
                       _startTimer();
@@ -558,9 +729,10 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Your progress is safe',
-                style: TextStyle(
+              // Spark balance hint
+              Text(
+                'Balance: ${progress.sparks}\u26A1',
+                style: const TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
@@ -578,6 +750,14 @@ class _GameScreenState extends ConsumerState<GameScreen>
   Widget _buildCompletionOverlay(NonogramState state, GameController controller) {
     final score = _calculateScore(state);
     final stars = _calculateStars(state);
+    final progress = ref.watch(progressProvider);
+
+    // Calculate sparks earned for this puzzle
+    final gridSize = state.puzzle.gridSize;
+    int sparksEarned = gridSize == 5 ? SparkRewards.complete5x5 : SparkRewards.complete10x10;
+    if (state.mistakes == 0) sparksEarned += SparkRewards.zeroErrorBonus;
+    if (stars >= 3) sparksEarned += SparkRewards.threeStarBonus;
+    if (state.puzzle.id.startsWith('daily_')) sparksEarned += SparkRewards.dailyPuzzle;
 
     return ClipRect(
       child: BackdropFilter(
@@ -665,7 +845,25 @@ class _GameScreenState extends ConsumerState<GameScreen>
                   );
                 }),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
+              // Sparks earned
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD84B).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFFFD84B).withValues(alpha: 0.2)),
+                ),
+                child: Text(
+                  '+$sparksEarned \u26A1',
+                  style: const TextStyle(
+                    color: Color(0xFFFFD84B),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               // Stats
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -673,6 +871,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                   _statItem('TIME', _timerText),
                   _statItem('ERRORS', '${state.mistakes}'),
                   _statItem('SCORE', '$score'),
+                  _statItem('SPARKS', '${progress.sparks}\u26A1'),
                 ],
               ),
               const SizedBox(height: 20),
@@ -820,13 +1019,26 @@ class _GameScreenState extends ConsumerState<GameScreen>
                         letterSpacing: 1,
                       ),
                     ),
-                    Text(
-                      achievement.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          achievement.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '+${achievement.sparkReward}\u26A1',
+                          style: const TextStyle(
+                            color: Color(0xFFFFD84B),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

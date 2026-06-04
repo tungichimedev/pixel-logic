@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/nonogram_puzzle.dart';
 import '../utils/sample_puzzles.dart';
+import 'progress_controller.dart';
 
 class DailyState {
   final NonogramPuzzle puzzle;
@@ -76,6 +77,8 @@ class DailyController extends Notifier<DailyState> {
   }
 
   Future<void> completeDaily(int timeSeconds) async {
+    if (state.completed) return; // Already completed, no double reward
+
     final better = state.bestTimeSeconds == null || timeSeconds < state.bestTimeSeconds!;
     state = state.copyWith(
       completed: true,
@@ -86,6 +89,9 @@ class DailyController extends Notifier<DailyState> {
       'completed': true,
       'bestTime': state.bestTimeSeconds,
     }));
+
+    // Award daily sparks via progress controller (write-before-grant done inside)
+    ref.read(progressProvider.notifier).claimDailyReward();
   }
 }
 

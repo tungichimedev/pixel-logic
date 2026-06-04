@@ -128,10 +128,10 @@ class AdService {
   }
 
   /// Show a rewarded ad. Returns true if reward was earned.
-  /// Max 2 rewarded ads per session.
+  /// Max 3 rewarded ads per session.
   Future<bool> showRewardedAd() async {
     if (!_initialized) return false;
-    if (_rewardedAdsThisSession >= 2) return false;
+    if (_rewardedAdsThisSession >= 3) return false;
     if (_rewardedAd == null) {
       _preloadRewarded();
       return false;
@@ -162,7 +162,7 @@ class AdService {
     return rewarded;
   }
 
-  bool get hasRewardedAd => _rewardedAd != null && _rewardedAdsThisSession < 2;
+  bool get hasRewardedAd => _rewardedAd != null && _rewardedAdsThisSession < 3;
 
   AdRequest get _adRequest => AdRequest(
     nonPersonalizedAds: !_consentGiven,
