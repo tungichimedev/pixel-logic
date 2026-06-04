@@ -26,6 +26,7 @@ class PurchaseService {
   // Current state
   bool _isPro = false;
   bool _isAdFree = false;
+  bool _configured = false; // true only if Purchases.configure() succeeded
   final _stateController = StreamController<void>.broadcast();
 
   bool get isPro => _isPro;
@@ -48,6 +49,7 @@ class PurchaseService {
 
     try {
       await Purchases.configure(PurchasesConfiguration(apiKey));
+      _configured = true;
 
       Purchases.addCustomerInfoUpdateListener((info) {
         _updateEntitlements(info);
@@ -71,6 +73,7 @@ class PurchaseService {
 
   /// Get available packages for the paywall
   Future<List<Package>> getOfferings() async {
+    if (!_configured) return [];
     try {
       final offerings = await Purchases.getOfferings();
       return offerings.current?.availablePackages ?? [];
@@ -82,6 +85,7 @@ class PurchaseService {
 
   /// Purchase a package. Returns a result enum.
   Future<PurchaseResult> purchase(Package package) async {
+    if (!_configured) return PurchaseResult.error;
     try {
       final result = await Purchases.purchasePackage(package);
       _updateEntitlements(result);
@@ -100,6 +104,7 @@ class PurchaseService {
 
   /// Purchase by product ID (for hint packs and non-sub products)
   Future<PurchaseResult> purchaseProduct(String productId) async {
+    if (!_configured) return PurchaseResult.error;
     try {
       final offerings = await Purchases.getOfferings();
       final packages = offerings.current?.availablePackages ?? [];
@@ -123,6 +128,7 @@ class PurchaseService {
 
   /// Restore previous purchases
   Future<bool> restorePurchases() async {
+    if (!_configured) return false;
     try {
       final info = await Purchases.restorePurchases();
       _updateEntitlements(info);

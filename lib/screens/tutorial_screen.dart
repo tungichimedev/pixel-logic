@@ -136,144 +136,132 @@ class _TutorialScreenState extends State<TutorialScreen>
       backgroundColor: AppColors.background,
       body: GradientBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 32),
-                // Title
-                Text(
-                  'HOW TO PLAY',
-                  style: AppFonts.pixel(
-                      fontSize: 11, color: Colors.white, letterSpacing: 1),
-                ),
-                const SizedBox(height: 24),
-                // Step title
-                Text(
-                  currentStep.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  currentStep.desc,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Tutorial grid with tooltip
-                _buildGridWithTooltip(),
-                const SizedBox(height: 20),
-                // Step-specific visual hint
-                _buildStepVisual(),
-                // Puzzle complete card (step 4)
-                if (_showComplete) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.satisfied.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                          color: AppColors.satisfied.withValues(alpha: 0.2)),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'PUZZLE COMPLETE!',
-                          style: AppFonts.pixel(
-                              fontSize: 11, color: AppColors.satisfied),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              // Title
+              Text(
+                'HOW TO PLAY',
+                style: AppFonts.pixel(
+                    fontSize: 14, color: Colors.white, letterSpacing: 2),
+              ),
+              // Main content — centered vertically
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Step title
+                      Text(
+                        currentStep.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
                         ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Auto-advances to Home',
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        currentStep.desc,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      // Tutorial grid with tooltip
+                      _buildGridWithTooltip(),
+                      const SizedBox(height: 20),
+                      // Step-specific visual hint
+                      _buildStepVisual(),
+                      // Puzzle complete card
+                      if (_showComplete) ...[
+                        const SizedBox(height: 12),
+                        _buildCompleteCard(opacity: 1.0),
+                      ],
+                      // Step 4 preview (faded)
+                      if (_step == 3 && !_showComplete) ...[
+                        const SizedBox(height: 12),
+                        _buildCompleteCard(opacity: 0.4),
+                      ],
+                      // Step 1 gated message
+                      if (_step == 1 &&
+                          !_cells[2][0] &&
+                          !_cells[2][1] &&
+                          !_cells[2][2]) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          'Fill the cells above to continue',
                           style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 8,
-                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary
+                                .withValues(alpha: 0.5),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ],
-                // Step 4 preview (faded, before completion)
-                if (_step == 3 && !_showComplete) ...[
-                  const SizedBox(height: 12),
-                  Opacity(
-                    opacity: 0.4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.satisfied.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                            color: AppColors.satisfied.withValues(alpha: 0.2)),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'PUZZLE COMPLETE!',
-                            style: AppFonts.pixel(
-                                fontSize: 11, color: AppColors.satisfied),
-                          ),
-                          const SizedBox(height: 2),
-                          const Text(
-                            'Auto-advances to Home',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 8,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-                const Spacer(),
-                // Step counter
-                Text(
-                  'Step ${_step + 1} of 4',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                // Buttons
-                if (!_showComplete) _buildButtons(),
-                // Step 1 gated message
-                if (_step == 1 &&
-                    !_cells[2][0] &&
-                    !_cells[2][1] &&
-                    !_cells[2][2])
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Fill the cells above to continue',
-                      style: TextStyle(
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                        fontSize: 9,
+              ),
+              // Bottom section — step counter + buttons
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    Text(
+                      'Step ${_step + 1} of 4',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
-                const SizedBox(height: 16),
-              ],
-            ),
+                    const SizedBox(height: 14),
+                    if (!_showComplete) _buildButtons(),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompleteCard({required double opacity}) {
+    return Opacity(
+      opacity: opacity,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.satisfied.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: AppColors.satisfied.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              'PUZZLE COMPLETE!',
+              style: AppFonts.pixel(
+                  fontSize: 12, color: AppColors.satisfied),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Auto-advances to Home',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -322,7 +310,7 @@ class _TutorialScreenState extends State<TutorialScreen>
             text,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 8,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               height: 1.5,
             ),
@@ -357,22 +345,22 @@ class _TutorialScreenState extends State<TutorialScreen>
     ];
     final v = visuals[_step];
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: v.color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: v.color.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Text(v.icon, style: TextStyle(fontSize: 20, color: v.color)),
-          const SizedBox(width: 10),
+          Text(v.icon, style: TextStyle(fontSize: 28, color: v.color)),
+          const SizedBox(width: 14),
           Expanded(
             child: Text(
               v.text,
               style: TextStyle(
                 color: v.color,
-                fontSize: 10,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
                 height: 1.4,
               ),
@@ -398,7 +386,7 @@ class _TutorialScreenState extends State<TutorialScreen>
                   'Skip',
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 13,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -457,8 +445,8 @@ class _TutorialScreenState extends State<TutorialScreen>
   Widget _buildTutorialGrid() {
     final rowClues = ['1', '1', '3'];
     final colClues = ['3', '1', '1'];
-    const cellSize = 28.0;
-    const clueWidth = 32.0;
+    const cellSize = 56.0;
+    const clueWidth = 40.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -477,7 +465,7 @@ class _TutorialScreenState extends State<TutorialScreen>
                   colClues[col],
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: satisfied
                         ? AppColors.satisfied
@@ -490,7 +478,7 @@ class _TutorialScreenState extends State<TutorialScreen>
             }),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         // Rows
         ...List.generate(3, (row) {
           final satisfied = _isRowSatisfied(row);
@@ -505,17 +493,17 @@ class _TutorialScreenState extends State<TutorialScreen>
                 width: clueWidth,
                 height: cellSize,
                 alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 4),
+                padding: const EdgeInsets.only(right: 6),
                 decoration: satisfied
                     ? BoxDecoration(
                         color: AppColors.satisfied.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(6),
                       )
                     : null,
                 child: Text(
                   rowClues[row],
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: satisfied
                         ? AppColors.satisfied
@@ -549,7 +537,7 @@ class _TutorialScreenState extends State<TutorialScreen>
                     child: Container(
                       width: cellSize,
                       height: cellSize,
-                      margin: const EdgeInsets.all(1),
+                      margin: const EdgeInsets.all(1.5),
                       decoration: BoxDecoration(
                         gradient: filled
                             ? const LinearGradient(
