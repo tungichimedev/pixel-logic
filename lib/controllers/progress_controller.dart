@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -119,9 +120,17 @@ String _todayKey() {
 }
 
 class ProgressController extends Notifier<ProgressState> {
+  Completer<void>? _loadCompleter;
+
+  /// Wait for disk load to complete before calling economy methods.
+  Future<void> get loaded => _loadCompleter?.future ?? Future.value();
+
   @override
   ProgressState build() {
-    _loadFromDisk();
+    _loadCompleter = Completer<void>();
+    _loadFromDisk().then((_) {
+      if (!_loadCompleter!.isCompleted) _loadCompleter!.complete();
+    });
     return const ProgressState();
   }
 
@@ -261,13 +270,19 @@ class ProgressController extends Notifier<ProgressState> {
       // Consecutive day
       newStreak = state.streakDay + 1;
     } else if (state.lastLoginDate != null && state.lastLoginDate != today) {
-      // Missed a day — check for streak freeze
-      if (state.streakFreezeAvailable) {
-        // Use the freeze
+      // Missed day(s) — check gap size and freeze
+      final lastDate = DateTime.tryParse(state.lastLoginDate!);
+      final todayDate = DateTime.tryParse(today);
+      final gapDays = (lastDate != null && todayDate != null)
+          ? todayDate.difference(lastDate).inDays
+          : 99;
+
+      if (gapDays == 2 && state.streakFreezeAvailable) {
+        // Missed exactly 1 day — use freeze
         newStreak = state.streakDay + 1;
         newFreezeAvailable = false;
       } else {
-        // Reset streak
+        // Missed 2+ days — reset streak (freeze only covers 1 day)
         newStreak = 1;
       }
     } else {
@@ -383,7 +398,7 @@ class ProgressController extends Notifier<ProgressState> {
     if (result.starsEarned >= 3 && !state.threeStarBonusClaimed.contains(result.puzzleId)) {
       final newClaimed = Set<String>.from(state.threeStarBonusClaimed)..add(result.puzzleId);
       state = state.copyWith(threeStarBonusClaimed: newClaimed);
-      _saveToDisk();
+      await _saveToDisk();
       addSparks(SparkRewards.threeStarBonus);
     }
   }

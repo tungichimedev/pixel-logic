@@ -9,7 +9,6 @@ class AdService {
 
   bool _initialized = false;
   int _puzzlesSinceLastInterstitial = 0;
-  int _rewardedAdsThisSession = 0;
   DateTime? _lastInterstitialTime;
   bool _purchaseInProgress = false;
 
@@ -128,10 +127,9 @@ class AdService {
   }
 
   /// Show a rewarded ad. Returns true if reward was earned.
-  /// Max 3 rewarded ads per session.
+  /// Daily cap is enforced by ProgressState.canWatchRewardedAd — check before calling.
   Future<bool> showRewardedAd() async {
     if (!_initialized) return false;
-    if (_rewardedAdsThisSession >= 3) return false;
     if (_rewardedAd == null) {
       _preloadRewarded();
       return false;
@@ -155,14 +153,13 @@ class AdService {
     await _rewardedAd!.show(
       onUserEarnedReward: (ad, reward) {
         rewarded = true;
-        _rewardedAdsThisSession++;
       },
     );
 
     return rewarded;
   }
 
-  bool get hasRewardedAd => _rewardedAd != null && _rewardedAdsThisSession < 3;
+  bool get hasRewardedAd => _rewardedAd != null;
 
   AdRequest get _adRequest => AdRequest(
     nonPersonalizedAds: !_consentGiven,

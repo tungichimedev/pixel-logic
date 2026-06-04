@@ -650,16 +650,18 @@ class _GameScreenState extends ConsumerState<GameScreen>
               // Watch ad button
               GestureDetector(
                 onTap: () async {
+                  // Check daily ad cap first
+                  if (!ref.read(progressProvider).canWatchRewardedAd) return;
                   if (AdService.instance.hasRewardedAd) {
                     final rewarded = await AdService.instance.showRewardedAd();
                     if (rewarded && mounted) {
+                      ref.read(progressProvider.notifier).recordRewardedAd();
                       controller.restoreLives();
                       _startTimer();
                       setState(() => _showZeroLives = false);
                     }
-                    // If dismissed early (not rewarded), do nothing
                   } else {
-                    // No ad available -- grant lives as fallback
+                    // No ad available — grant lives as fallback
                     if (mounted) {
                       controller.restoreLives();
                       _startTimer();
@@ -738,6 +740,22 @@ class _GameScreenState extends ConsumerState<GameScreen>
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              const SizedBox(height: 8),
+              // Pro upgrade hint
+              GestureDetector(
+                onTap: () {
+                  setState(() => _showZeroLives = false);
+                  context.push('/paywall');
+                },
+                child: Text(
+                  'Unlimited lives with Pro \u2197',
+                  style: TextStyle(
+                    color: AppColors.primary.withValues(alpha: 0.7),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -752,11 +770,13 @@ class _GameScreenState extends ConsumerState<GameScreen>
     final stars = _calculateStars(state);
     final progress = ref.watch(progressProvider);
 
-    // Calculate sparks earned for this puzzle
+    // Calculate sparks earned for this puzzle (match actual grant logic)
     final gridSize = state.puzzle.gridSize;
     int sparksEarned = gridSize == 5 ? SparkRewards.complete5x5 : SparkRewards.complete10x10;
     if (state.mistakes == 0) sparksEarned += SparkRewards.zeroErrorBonus;
-    if (stars >= 3) sparksEarned += SparkRewards.threeStarBonus;
+    if (stars >= 3 && !progress.threeStarBonusClaimed.contains(state.puzzle.id)) {
+      sparksEarned += SparkRewards.threeStarBonus;
+    }
     if (state.puzzle.id.startsWith('daily_')) sparksEarned += SparkRewards.dailyPuzzle;
 
     return ClipRect(

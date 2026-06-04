@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,9 +82,15 @@ class AchievementsController extends Notifier<AchievementState> {
     ),
   ];
 
+  Completer<void>? _loadCompleter;
+  Future<void> get loaded => _loadCompleter?.future ?? Future.value();
+
   @override
   AchievementState build() {
-    _loadFromDisk();
+    _loadCompleter = Completer<void>();
+    _loadFromDisk().then((_) {
+      if (!_loadCompleter!.isCompleted) _loadCompleter!.complete();
+    });
     return const AchievementState();
   }
 

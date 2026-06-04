@@ -40,11 +40,12 @@ class _MainShellState extends ConsumerState<MainShell> {
     final onboardingDone = prefs.getBool('onboarding_complete') ?? false;
     final tutorialDone = prefs.getBool('tutorial_complete') ?? false;
 
-    // Trigger login streak check and life regen on app open
+    // Wait for disk load before calling economy methods
     if (onboardingDone) {
+      await ref.read(progressProvider.notifier).loaded;
+      await ref.read(achievementsProvider.notifier).loaded;
       ref.read(progressProvider.notifier).checkLoginStreak();
       ref.read(progressProvider.notifier).regenLives();
-      // Check streak achievement
       final streakDay = ref.read(progressProvider).streakDay;
       ref.read(achievementsProvider.notifier).checkStreak(streakDay);
     }
@@ -94,11 +95,10 @@ class _MainShellState extends ConsumerState<MainShell> {
 
     if (_showTutorial) {
       return TutorialScreen(
-        onComplete: () {
+        onComplete: () async {
           setState(() => _showTutorial = false);
-          // Request consent AFTER tutorial -- user has seen value first
           _requestConsentAndInitAds();
-          // Now trigger login streak for first time
+          await ref.read(progressProvider.notifier).loaded;
           ref.read(progressProvider.notifier).checkLoginStreak();
           ref.read(progressProvider.notifier).regenLives();
         },
