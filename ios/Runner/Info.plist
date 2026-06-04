@@ -50,7 +50,7 @@
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Your device's advertising identifier will be used to deliver personalized ads and measure ad performance. You can still use the app with generic ads if you decline.</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-XXXXX~XXXXX</string>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict><key>SKAdNetworkIdentifier</key><string>cstr6suwn9.skadnetwork</string></dict>

@@ -39,19 +39,24 @@ class PurchaseService {
         ? _iosApiKey
         : _androidApiKey;
 
-    await Purchases.configure(PurchasesConfiguration(apiKey));
+    // Skip RevenueCat if using placeholder keys
+    if (apiKey.contains('XXXXX')) {
+      debugPrint('RevenueCat skipped — placeholder API key detected');
+      _initialized = true;
+      return;
+    }
 
-    // Listen for purchase updates
-    Purchases.addCustomerInfoUpdateListener((info) {
-      _updateEntitlements(info);
-    });
-
-    // Initial check
     try {
+      await Purchases.configure(PurchasesConfiguration(apiKey));
+
+      Purchases.addCustomerInfoUpdateListener((info) {
+        _updateEntitlements(info);
+      });
+
       final info = await Purchases.getCustomerInfo();
       _updateEntitlements(info);
     } catch (e) {
-      debugPrint('RevenueCat initial check failed: $e');
+      debugPrint('RevenueCat init failed: $e');
     }
 
     _initialized = true;
