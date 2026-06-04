@@ -74,17 +74,25 @@ class _TutorialScreenState extends State<TutorialScreen>
 
   bool _showComplete = false;
 
+  bool _advancing = false;
+
   void _tapCell(int row, int col) {
     // Step 1 (fill bottom row) — allow tapping row 2 only
     if (_step == 1) {
-      if (row != 2) return;
+      if (row != 2 || _cells[row][col] || _advancing) return;
       HapticFeedback.lightImpact();
       setState(() {
         _cells[row][col] = true;
         if (_cells[2][0] && _cells[2][1] && _cells[2][2]) {
+          _advancing = true;
           HapticFeedback.mediumImpact();
           Future.delayed(const Duration(milliseconds: 400), () {
-            if (mounted) setState(() => _step = 2);
+            if (mounted) {
+              setState(() {
+                _step = 2;
+                _advancing = false;
+              });
+            }
           });
         }
       });

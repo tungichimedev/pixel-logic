@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../controllers/purchase_controller.dart';
 import '../services/ad_service.dart';
+import '../services/consent_service.dart';
 
 class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({super.key});
@@ -34,7 +35,9 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
     _bannerAd = BannerAd(
       adUnitId: _bannerAdUnitId,
       size: AdSize.getInlineAdaptiveBannerAdSize(width, 60),
-      request: const AdRequest(),
+      request: AdRequest(
+        nonPersonalizedAds: !ConsentService.instance.consentGiven,
+      ),
       listener: BannerAdListener(
         onAdLoaded: (_) {
           if (mounted) setState(() => _adLoaded = true);

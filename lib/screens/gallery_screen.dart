@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../controllers/progress_controller.dart';
 import '../models/nonogram_puzzle.dart';
 import '../utils/app_theme.dart';
@@ -117,7 +118,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                           ),
                           const SizedBox(height: 16),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              final firstPack = PuzzleRegistry.packs.first;
+                              context.push('/pack/${firstPack.id}');
+                            },
                             child: const Text(
                               'START YOUR FIRST PUZZLE \u2192',
                               style: TextStyle(

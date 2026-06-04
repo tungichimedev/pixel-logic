@@ -12,12 +12,7 @@ class ProgressState {
   int get level => totalXP ~/ 200;
 
   int completedInPack(String packId) {
-    return results.values.where((r) => r.puzzleId.contains(packId) || _packMatch(r.puzzleId, packId)).length;
-  }
-
-  bool _packMatch(String puzzleId, String packId) {
-    // Simple heuristic — puzzles contain pack name or we check the registry
-    return puzzleId.startsWith(packId) || puzzleId.contains('_');
+    return results.values.where((r) => r.puzzleId.startsWith('${packId}_')).length;
   }
 
   int starsInPack(String packId, List<String> puzzleIds) {

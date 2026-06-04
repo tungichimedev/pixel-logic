@@ -348,8 +348,9 @@ class SettingsScreen extends ConsumerWidget {
               } catch (_) {}
               // Reset consent
               await ConsentService.instance.resetConsent();
-              if (ctx.mounted) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
+              // Use the parent context (not dialog context) for SnackBar
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('All data deleted. Please restart the app.'),
                     backgroundColor: Color(0xFFFF3B30),

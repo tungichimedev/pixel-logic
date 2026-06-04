@@ -140,7 +140,7 @@ class HomeScreen extends ConsumerWidget {
                   Text(
                     daily.completed
                         ? 'Completed! Best: ${_formatTime(daily.bestTimeSeconds ?? 0)}'
-                        : '${daily.puzzle.gridSize}x${daily.puzzle.gridSize} \u2022 +100 XP \u2022 +1 Hint',
+                        : '${daily.puzzle.gridSize}x${daily.puzzle.gridSize} \u2022 New challenge every day',
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 11,

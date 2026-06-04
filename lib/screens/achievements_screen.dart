@@ -81,15 +81,15 @@ class AchievementsScreen extends ConsumerWidget {
       Achievement achievement, ProgressState progress, bool unlocked) {
     if (unlocked) return 1.0;
     switch (achievement.id) {
-      case 'first_steps':
+      case 'first_solve':
         return progress.results.isEmpty ? 0.0 : 1.0;
-      case 'dedicated':
+      case 'ten_puzzles':
         return (progress.results.length / 10).clamp(0.0, 1.0);
-      case 'perfectionist':
+      case 'perfect_solve':
         final perfect = progress.results.values
-            .where((r) => r.starsEarned >= 3)
+            .where((r) => r.mistakes == 0)
             .length;
-        return (perfect / 30).clamp(0.0, 1.0);
+        return perfect >= 1 ? 1.0 : 0.0;
       default:
         return 0.0;
     }

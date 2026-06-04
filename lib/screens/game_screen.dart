@@ -101,9 +101,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
     final state = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
 
-    // Detect zero lives
+    // Detect zero lives (skip if already showing completion)
     ref.listen(gameControllerProvider, (prev, next) {
-      if (next.livesRemaining <= 0 && (prev?.livesRemaining ?? 3) > 0) {
+      if (next.livesRemaining <= 0 && (prev?.livesRemaining ?? 3) > 0 && !_showComplete) {
         HapticFeedback.heavyImpact();
         _timer?.cancel();
         setState(() => _showZeroLives = true);
@@ -182,11 +182,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
                         onCellTap: (row, col) {
                           controller.tapCell(row, col);
                           // Auto-clear error cells after delay
-                          if (state.errorCells.isEmpty) {
-                            Future.delayed(const Duration(milliseconds: 600), () {
-                              if (mounted) controller.clearErrors();
-                            });
-                          }
+                          Future.delayed(const Duration(milliseconds: 600), () {
+                            if (mounted) controller.clearErrors();
+                          });
                         },
                         onHintTap: (row, col) {
                           final used = controller.useHintOnCell(row, col);
