@@ -140,17 +140,11 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
                             widget.onCellTap(row, col);
                           }
                         },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: _cellSize,
-                          height: _cellSize,
-                          margin: const EdgeInsets.all(0.5),
-                          decoration: isError
-                              ? _errorDecoration()
-                              : _cellDecoration(widget.state.cells[row][col], isHintTarget: isHintTarget),
-                          child: isError
-                              ? _errorChild(_cellSize)
-                              : _cellChild(widget.state.cells[row][col], _cellSize),
+                        child: _CellWidget(
+                          cellState: widget.state.cells[row][col],
+                          isError: isError,
+                          isHintTarget: isHintTarget,
+                          cellSize: _cellSize,
                         ),
                       );
                     }),
@@ -238,7 +232,126 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
     _draggedCells.clear();
   }
 
-  // --- Cell visuals ---
+  double _maxRowClueWidth() {
+    int maxNums = 1;
+    for (final clue in widget.state.puzzle.rowClues) {
+      if (clue.runs.length > maxNums) maxNums = clue.runs.length;
+    }
+    return (maxNums * 14.0 + 8).clamp(32.0, 80.0);
+  }
+
+  double _maxColClueHeight() {
+    int maxNums = 1;
+    for (final clue in widget.state.puzzle.colClues) {
+      if (clue.runs.length > maxNums) maxNums = clue.runs.length;
+    }
+    return (maxNums * 16.0 + 4).clamp(24.0, 80.0);
+  }
+}
+
+/// Individual cell widget with scale-pop animation on fill/reveal.
+/// Animates from 0.6 → 1.05 → 1.0 when transitioning into [CellState.filled]
+/// or [CellState.revealed], providing tactile "snap" game juice.
+class _CellWidget extends StatefulWidget {
+  final CellState cellState;
+  final bool isError;
+  final bool isHintTarget;
+  final double cellSize;
+
+  const _CellWidget({
+    required this.cellState,
+    required this.isError,
+    required this.isHintTarget,
+    required this.cellSize,
+  });
+
+  @override
+  State<_CellWidget> createState() => _CellWidgetState();
+}
+
+class _CellWidgetState extends State<_CellWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnim;
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 220),
+      vsync: this,
+    );
+    // Overshoot spring: 0.6 → 1.05 → 1.0
+    _scaleAnim = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 0.6, end: 1.05)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 70,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.05, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 30,
+      ),
+    ]).animate(_controller);
+  }
+
+  @override
+  void didUpdateWidget(_CellWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Trigger pop animation when cell becomes filled or revealed
+    if (oldWidget.cellState != widget.cellState &&
+        (widget.cellState == CellState.filled ||
+            widget.cellState == CellState.revealed)) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final decoration = widget.isError
+        ? _errorDecoration()
+        : _cellDecoration(widget.cellState, isHintTarget: widget.isHintTarget);
+    final child = widget.isError
+        ? _errorChild(widget.cellSize)
+        : _cellChild(widget.cellState, widget.cellSize);
+
+    // Only animate filled/revealed; other states use AnimatedContainer
+    final shouldAnimate = widget.cellState == CellState.filled ||
+        widget.cellState == CellState.revealed;
+
+    if (shouldAnimate && _controller.isAnimating) {
+      return AnimatedBuilder(
+        animation: _scaleAnim,
+        builder: (context, _) => Transform.scale(
+          scale: _scaleAnim.value,
+          child: Container(
+            width: widget.cellSize,
+            height: widget.cellSize,
+            margin: const EdgeInsets.all(0.5),
+            decoration: decoration,
+            child: child,
+          ),
+        ),
+      );
+    }
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: widget.cellSize,
+      height: widget.cellSize,
+      margin: const EdgeInsets.all(0.5),
+      decoration: decoration,
+      child: child,
+    );
+  }
+
+  // --- Cell visuals (same as before, extracted here) ---
 
   BoxDecoration _cellDecoration(CellState cell, {bool isHintTarget = false}) {
     if (isHintTarget) {
@@ -343,21 +456,5 @@ class _NonogramGridWidgetState extends State<NonogramGridWidget> {
       );
     }
     return null;
-  }
-
-  double _maxRowClueWidth() {
-    int maxNums = 1;
-    for (final clue in widget.state.puzzle.rowClues) {
-      if (clue.runs.length > maxNums) maxNums = clue.runs.length;
-    }
-    return (maxNums * 14.0 + 8).clamp(32.0, 80.0);
-  }
-
-  double _maxColClueHeight() {
-    int maxNums = 1;
-    for (final clue in widget.state.puzzle.colClues) {
-      if (clue.runs.length > maxNums) maxNums = clue.runs.length;
-    }
-    return (maxNums * 16.0 + 4).clamp(24.0, 80.0);
   }
 }
