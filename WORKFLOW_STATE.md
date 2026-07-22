@@ -1,3 +1,16 @@
+---
+project: — Pixel Logic (Nonogram)
+category: games/_archive
+phase: 5
+phase_name: 
+status: done
+blocker: 
+next_action: 
+updated: 
+platform: flutter
+github: "https://github.com/tungichimedev/pixel-logic.git"
+---
+
 # Workflow State — Pixel Logic (Nonogram)
 
 ## Current Phase: 5 — Refine (COMPLETE) / 6 — Monetize (COMPLETE)
