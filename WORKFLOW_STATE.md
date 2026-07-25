@@ -1,3 +1,6 @@
+project_type: GAME
+process_stage: development   # derived — kit migration rule: absent means development
+solo_dev_mode: false
 ---
 project: — Pixel Logic (Nonogram)
 category: games/_archive
